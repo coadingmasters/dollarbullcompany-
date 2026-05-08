@@ -117,6 +117,238 @@
     </div>
 </section>
 
+{{-- ============================================================
+     Services Section — 4 Animated Cards
+     Black & Gold | Paste after stats-bar in welcome.blade.php
+     OR save as: resources/views/layouts/partials/services.blade.php
+     and include with: @include('layouts.partials.services')
+     ============================================================ --}}
+
+
+
+
+{{-- ══════════════════════════════════════════════════════════
+     HTML
+══════════════════════════════════════════════════════════ --}}
+<section class="services-section" id="servicesSection" aria-label="Our Services">
+    <div class="services-container">
+
+        {{-- ── Section Header ── --}}
+        <div class="section-header">
+            <div class="section-eyebrow">
+                <span class="eyebrow-line"></span>
+                What We Offer
+                <span class="eyebrow-line right"></span>
+            </div>
+            <h2 class="section-title">
+                Everything You Need to<br>
+                <span>Master Crypto</span>
+            </h2>
+            <p class="section-desc">
+                From exclusive insider groups to live expert sessions — we provide every tool you need to thrive in the digital asset space.
+            </p>
+        </div>
+
+        {{-- ── Cards Grid ── --}}
+        <div class="services-grid" id="servicesGrid">
+
+            {{-- ── 1. Premium Group ── --}}
+            <div class="service-card" style="--ci:0" data-card>
+                <div class="card-shimmer"></div>
+                <div class="card-img-wrap">
+                    <img
+                        class="card-img"
+                        src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80"
+                        alt="Premium Group"
+                        loading="lazy"
+                    >
+                    <div class="card-img-overlay"></div>
+                    <div class="card-number">01</div>
+                    <div class="card-icon-badge" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M3 18h18M5 18l-1-9 5 4 3-7 3 7 5-4-1 9H5z" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <span class="card-tag">Exclusive Access</span>
+                    <h3 class="card-title">Premium Group</h3>
+                    <p class="card-desc">
+                        Join our elite private community of serious crypto investors. Get insider signals, whale alerts, and curated alpha before the market moves.
+                    </p>
+                    <a href="{{ url('/premium-group') }}" class="card-btn">
+                        <span class="btn-fill"></span>
+                        <span>Join Now</span>
+                        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                    <div class="card-stats">
+                        <div class="card-stat">
+                            <span class="cs-val">12K+</span>
+                            <span class="cs-lbl">Members</span>
+                        </div>
+                        <div class="card-stat">
+                            <span class="cs-val">Daily</span>
+                            <span class="cs-lbl">Signals</span>
+                        </div>
+                        <div class="card-stat">
+                            <span class="cs-val">VIP</span>
+                            <span class="cs-lbl">Support</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ── 2. Paid Courses ── --}}
+            <div class="service-card" style="--ci:1" data-card>
+                <div class="card-shimmer"></div>
+                <div class="card-img-wrap">
+                    <img
+                        class="card-img"
+                        src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80"
+                        alt="Paid Courses"
+                        loading="lazy"
+                    >
+                    <div class="card-img-overlay"></div>
+                    <div class="card-number">02</div>
+                    <div class="card-icon-badge" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M22 10L12 5 2 10l10 5 10-5z" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M6 12v5c3.33 1.67 8.67 1.67 12 0v-5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <span class="card-tag">Learn & Earn</span>
+                    <h3 class="card-title">Paid Courses</h3>
+                    <p class="card-desc">
+                        Structured crypto courses from beginner to advanced. Master technical analysis, DeFi strategies, and portfolio management with certified instructors.
+                    </p>
+                    <a href="{{ url('/courses') }}" class="card-btn">
+                        <span class="btn-fill"></span>
+                        <span>Enrol Today</span>
+                        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                    <div class="card-stats">
+                        <div class="card-stat">
+                            <span class="cs-val">40+</span>
+                            <span class="cs-lbl">Courses</span>
+                        </div>
+                        <div class="card-stat">
+                            <span class="cs-val">Expert</span>
+                            <span class="cs-lbl">Tutors</span>
+                        </div>
+                        <div class="card-stat">
+                            <span class="cs-val">Cert.</span>
+                            <span class="cs-lbl">Awarded</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ── 3. Live Sessions ── --}}
+            <div class="service-card" style="--ci:2" data-card>
+                <div class="card-shimmer"></div>
+                <div class="card-img-wrap">
+                    <img
+                        class="card-img"
+                        src="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&q=80"
+                        alt="Live Sessions"
+                        loading="lazy"
+                    >
+                    <div class="card-img-overlay"></div>
+                    <div class="card-number">03</div>
+                    <div class="card-icon-badge" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <rect x="2" y="7" width="15" height="10" rx="1" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M17 9l5-2v10l-5-2V9z" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <span class="card-tag">Real-Time</span>
+                    <h3 class="card-title">Live Sessions</h3>
+                    <p class="card-desc">
+                        Interactive live trading sessions with top analysts. Watch real trades, ask live questions, and learn to read market momentum as it happens.
+                    </p>
+                    <a href="{{ url('/live-sessions') }}" class="card-btn">
+                        <span class="btn-fill"></span>
+                        <span>Watch Live</span>
+                        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                    <div class="card-stats">
+                        <div class="card-stat">
+                            <span class="cs-val">3×</span>
+                            <span class="cs-lbl">Weekly</span>
+                        </div>
+                        <div class="card-stat">
+                            <span class="cs-val">HD</span>
+                            <span class="cs-lbl">Stream</span>
+                        </div>
+                        <div class="card-stat">
+                            <span class="cs-val">Q&amp;A</span>
+                            <span class="cs-lbl">Live</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ── 4. P2P ── --}}
+            <div class="service-card" style="--ci:3" data-card>
+                <div class="card-shimmer"></div>
+                <div class="card-img-wrap">
+                    <img
+                        class="card-img"
+                        src="https://images.unsplash.com/photo-1644361566696-3d442b5b482a?w=800&q=80"
+                        alt="P2P Trading"
+                        loading="lazy"
+                    >
+                    <div class="card-img-overlay"></div>
+                    <div class="card-number">04</div>
+                    <div class="card-icon-badge" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M17 1l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M3 11V9a4 4 0 014-4h14" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M7 23l-4-4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M21 13v2a4 4 0 01-4 4H3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <span class="card-tag">Peer-to-Peer</span>
+                    <h3 class="card-title">P2P Trading</h3>
+                    <p class="card-desc">
+                        Trade directly with verified community members. Zero middleman fees, flexible payment methods, and escrow-secured transactions for total peace of mind.
+                    </p>
+                    <a href="{{ url('/p2p') }}" class="card-btn">
+                        <span class="btn-fill"></span>
+                        <span>Start Trading</span>
+                        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                    <div class="card-stats">
+                        <div class="card-stat">
+                            <span class="cs-val">0%</span>
+                            <span class="cs-lbl">Fees</span>
+                        </div>
+                        <div class="card-stat">
+                            <span class="cs-val">Escrow</span>
+                            <span class="cs-lbl">Secured</span>
+                        </div>
+                        <div class="card-stat">
+                            <span class="cs-val">24/7</span>
+                            <span class="cs-lbl">Active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>{{-- /.services-grid --}}
+    </div>{{-- /.services-container --}}
+</section>
+
+
+{{-- ══════════════════════════════════════════════════════════
+     JS — IntersectionObserver entrance animation
+══════════════════════════════════════════════════════════ --}}
 
 
 

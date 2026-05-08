@@ -70,3 +70,23 @@
     startAuto();
 
 })();
+
+
+(function () {
+    var cards = document.querySelectorAll('[data-card]');
+    if (!cards.length) return;
+
+    if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                    io.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        cards.forEach(function (c) { io.observe(c); });
+    } else {
+        cards.forEach(function (c) { c.classList.add('in-view'); });
+    }
+})();
