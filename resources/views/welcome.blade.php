@@ -345,6 +345,89 @@
     </div>{{-- /.services-container --}}
 </section>
 
+{{-- ============================================================
+     About Us Section
+     Paste after services section in welcome.blade.php
+     OR save as: resources/views/layouts/partials/about.blade.php
+     ============================================================ --}}
+
+
+
+
+<section class="about-section" id="aboutSection" aria-label="About Us">
+    <div class="about-inner">
+
+        {{-- ── Image Column ── --}}
+        <div class="about-img-col" data-about-col>
+            <div class="about-img-frame">
+                <img
+                    src="https://images.unsplash.com/photo-1642790106117-e829e14a795f?w=900&q=80"
+                    alt="CryptoOnly Team — Trading professionals"
+                    loading="lazy"
+                >
+            </div>
+            <div class="about-corner tl"></div>
+            <div class="about-corner br"></div>
+            <div class="about-badge">
+                <div class="about-badge-val">2019</div>
+                <div class="about-badge-lbl">Est. Founded</div>
+            </div>
+        </div>
+
+        {{-- ── Text Column ── --}}
+        <div class="about-text-col" data-about-col>
+
+            <div class="about-eyebrow">
+                <span class="ey-line"></span>
+                About Us
+            </div>
+
+            <h2 class="about-title">
+                Built by Traders,<br>
+                <span>For Traders</span>
+            </h2>
+
+            <div class="about-divider"></div>
+
+            <p class="about-desc">
+                CryptoOnly was born from a simple belief — that every serious trader deserves access to the same institutional-grade intelligence, community, and tools that move markets globally.
+            </p>
+
+            <div class="about-points">
+                <div class="about-point">
+                    <div class="about-point-icon">✦</div>
+                    <div class="about-point-body">
+                        <div class="about-point-title">Our Mission</div>
+                        <div class="about-point-text">To democratise crypto wealth by equipping every member with knowledge, signals, and a thriving peer community.</div>
+                    </div>
+                </div>
+                <div class="about-point">
+                    <div class="about-point-icon">◈</div>
+                    <div class="about-point-body">
+                        <div class="about-point-title">Our Edge</div>
+                        <div class="about-point-text">A team of 20+ certified analysts, ex-institutional traders, and DeFi researchers working daily on your behalf.</div>
+                    </div>
+                </div>
+                <div class="about-point">
+                    <div class="about-point-icon">▲</div>
+                    <div class="about-point-body">
+                        <div class="about-point-title">Our Track Record</div>
+                        <div class="about-point-text">Over $4.2B in community trading volume and 320,000+ members across 60 countries since launch.</div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="{{ url('/about') }}" class="about-btn">
+                <span class="ab-fill"></span>
+                <span>Read More</span>
+                <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+
+        </div>
+    </div>
+</section>
+
+
 
 {{-- ══════════════════════════════════════════════════════════
      JS — IntersectionObserver entrance animation

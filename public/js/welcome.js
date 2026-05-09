@@ -90,3 +90,18 @@
         cards.forEach(function (c) { c.classList.add('in-view'); });
     }
 })();
+
+(function () {
+    var cols = document.querySelectorAll('[data-about-col]');
+    if (!cols.length) return;
+    if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (e.isIntersecting) { e.target.classList.add('in-view'); io.unobserve(e.target); }
+            });
+        }, { threshold: 0.12 });
+        cols.forEach(function (c) { io.observe(c); });
+    } else {
+        cols.forEach(function (c) { c.classList.add('in-view'); });
+    }
+})();
