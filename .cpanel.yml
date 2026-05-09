@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home3/dollarbu/cryptoproject
+    - /bin/cp -R %PROJECT_ROOT%/* $DEPLOYPATH
