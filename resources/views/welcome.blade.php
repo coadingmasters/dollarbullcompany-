@@ -434,7 +434,7 @@
 ══════════════════════════════════════════════════════════ --}}
 
 
-
+@include('layouts.partials.footer')
 <script defer src="{{ asset('js/welcome.js') }}"></script>
 </body>
 </html>
