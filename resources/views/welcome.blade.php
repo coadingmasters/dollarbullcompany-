@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/welcome.css') }}">
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/css/welcome.css', 'resources/js/welcome.js'])
     
 </head>
 <body>
@@ -434,6 +434,5 @@
 
 
 @include('layouts.partials.footer')
-<script src="{{ asset('js/welcome.js') }}"></script>
 </body>
 </html>
