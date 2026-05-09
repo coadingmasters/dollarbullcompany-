@@ -3,3 +3,4 @@ deployment:
   tasks:
     - /bin/cp -R /home3/dollarbu/dollarbullcompany-/public/css /home3/dollarbu/public_html/
     - /bin/cp -R /home3/dollarbu/dollarbullcompany-/public/js /home3/dollarbu/public_html/
+    - /bin/cp -R /home3/dollarbu/dollarbullcompany-/public/build /home3/dollarbu/public_html/
