@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
-   <link rel="stylesheet" href="{{ asset('css/welcome.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/welcome.css') }}">
     
 </head>
 <body>
@@ -31,7 +31,6 @@
             >
 
             <div class="slide-overlay"></div>
-
             <div class="slide-content">
                 <div class="slide-badge">
                     <span class="badge-dot"></span>
@@ -435,6 +434,6 @@
 
 
 @include('layouts.partials.footer')
-<script defer src="{{ asset('js/welcome.js') }}"></script>
+<script src="{{ asset('js/welcome.js') }}"></script>
 </body>
 </html>
