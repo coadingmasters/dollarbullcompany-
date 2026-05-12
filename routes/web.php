@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\CourseController;
 
 Route::get('/', function () {
     $slides = [
@@ -72,3 +73,14 @@ Route::get('/premium-group', function () {
 Route::get('/enroll', [EnrollmentController::class, 'index'])->name('enrollment.index');
 Route::post('/enroll', [EnrollmentController::class, 'store'])->name('enrollment.store');
 Route::get('/enroll/success', [EnrollmentController::class, 'success'])->name('enrollment.success');
+
+// Frontend - Courses Listing
+Route::get('/courses', function () {
+    $courses = \App\Models\Course::where('status', 'published')->latest()->get();
+    return view('frontend.courses', compact('courses'));
+})->name('courses.frontend');
+
+// Admin - Course Management
+Route::middleware('auth:admin')->prefix('admin')->group(function () {
+    Route::resource('courses', CourseController::class);
+});
