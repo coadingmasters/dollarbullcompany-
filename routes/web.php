@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\EnrollmentController;
 
 Route::get('/', function () {
     $slides = [
@@ -64,3 +65,10 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         return view('admin.Dashboard');
     })->name('admin.dashboard');
 });
+Route::get('/premium-group', function () {
+    return view('frontend.premiumgroup');
+})->name('premium.group');
+
+Route::get('/enroll', [EnrollmentController::class, 'index'])->name('enrollment.index');
+Route::post('/enroll', [EnrollmentController::class, 'store'])->name('enrollment.store');
+Route::get('/enroll/success', [EnrollmentController::class, 'success'])->name('enrollment.success');
