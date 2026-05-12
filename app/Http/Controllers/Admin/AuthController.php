@@ -24,7 +24,7 @@ public function login(Request $request)
 {
     $credentials = $request->only('email', 'password');
 
-    if (Auth::attempt($credentials)) {
+    if (Auth::guard('admin')->attempt($credentials)) {
         return redirect()->intended(route('admin.dashboard'));
     }
 
@@ -35,7 +35,7 @@ public function login(Request $request)
      */
     public function logout(Request $request)
     {
-        Auth::logout();
+        Auth::guard('admin')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

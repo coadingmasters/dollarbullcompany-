@@ -59,7 +59,7 @@ Route::get('/admin/login', [AuthController::class, 'showLoginForm'])->name('admi
 Route::post('/admin/login', [AuthController::class, 'login'])->name('admin.login.submit');
 Route::post('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
-Route::middleware('auth')->prefix('admin')->group(function () {
+Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.Dashboard');
     })->name('admin.dashboard');
