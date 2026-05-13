@@ -32,4 +32,23 @@ class EnrollmentController extends Controller
     {
         return view('enrollments.success');
     }
+
+    // Admin endpoints
+    public function adminIndex()
+    {
+        $enrollments = Enrollment::latest()->get();
+        return view('admin.enrollments', compact('enrollments'));
+    }
+
+    public function verify(Enrollment $enrollment)
+    {
+        $enrollment->update(['status' => 'verified']);
+        return back()->with('success', 'Enrollment verified!');
+    }
+
+    public function reject(Enrollment $enrollment)
+    {
+        $enrollment->update(['status' => 'rejected']);
+        return back()->with('success', 'Enrollment rejected!');
+    }
 }

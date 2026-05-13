@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\CourseController;
 
+
 Route::get('/', function () {
     $slides = [
         [
@@ -65,6 +66,14 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.Dashboard');
     })->name('admin.dashboard');
+    
+    // Enrollments Management
+    Route::get('/enrollments', [EnrollmentController::class, 'adminIndex'])->name('enrollments.admin');
+    Route::patch('/enrollments/{enrollment}/verify', [EnrollmentController::class, 'verify'])->name('enrollments.verify');
+    Route::patch('/enrollments/{enrollment}/reject', [EnrollmentController::class, 'reject'])->name('enrollments.reject');
+    
+    // Course Management
+    Route::resource('courses', CourseController::class);
 });
 Route::get('/premium-group', function () {
     return view('frontend.premiumgroup');
@@ -76,7 +85,7 @@ Route::get('/enroll/success', [EnrollmentController::class, 'success'])->name('e
 
 // Frontend - Courses Listing
 Route::get('/courses', function () {
-    $courses = \App\Models\Course::where('status', 'published')->latest()->get();
+    $courses = \App\Models\course::where('status', 'published')->latest()->get();
     return view('frontend.courses', compact('courses'));
 })->name('courses.frontend');
 
@@ -84,3 +93,6 @@ Route::get('/courses', function () {
 Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::resource('courses', CourseController::class);
 });
+Route::get('/about',   fn() => view('about'))->name('about');
+Route::get('/contact', fn() => view('contact'))->name('contact');
+Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
