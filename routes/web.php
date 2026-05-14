@@ -85,7 +85,7 @@ Route::get('/enroll/success', [EnrollmentController::class, 'success'])->name('e
 
 // Frontend - Courses Listing
 Route::get('/courses', function () {
-    $courses = \App\Models\course::where('status', 'published')->latest()->get();
+    $courses = \App\Models\Course::where('status', 'published')->latest()->get();
     return view('frontend.courses', compact('courses'));
 })->name('courses.frontend');
 
