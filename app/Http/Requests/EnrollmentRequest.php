@@ -16,8 +16,8 @@ class EnrollmentRequest extends FormRequest
             'email'           => 'required|email|unique:enrollments,email',
             'whatsapp_number' => 'required|string|max:20',
             'country'         => 'required|string|max:100',
-            'experience'      => 'required|in:less_than_6_months,more_than_6_months',
-            'enrollment_type' => 'required|in:online_lectures',
+            'cicni'           => 'required|string|max:50',
+            'face_recognition' => 'required|string|max:255',
             'course'          => 'required|string',
             'payment_screenshot' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
         ];

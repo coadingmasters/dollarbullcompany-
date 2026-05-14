@@ -332,26 +332,15 @@ select option{background:#1a1a1a}
         </div>
         
         <div class="field" style="margin-bottom:14px">
-          <span class="fgl">Experience</span>
-          <div class="cg">
-            <label class="ci">
-              <input type="radio" name="experience" value="less_than_6_months" {{ old('experience') === 'less_than_6_months' ? 'checked' : '' }} required>
-              Less than 6 months <em style="color:var(--muted);font-size:.78rem">(Beginners welcome)</em>
-            </label>
-            <label class="ci">
-              <input type="radio" name="experience" value="more_than_6_months" {{ old('experience') === 'more_than_6_months' ? 'checked' : '' }}>
-              More than 6 months
-            </label>
-          </div>
-          @error('experience')<span class="error-text">{{ $message }}</span>@enderror
+          <label>CICNI <span class="req">*</span></label>
+          <input type="text" name="cicni" placeholder="Enter your CICNI" value="{{ old('cicni') }}" required>
+          @error('cicni')<span class="error-text">{{ $message }}</span>@enderror
         </div>
         
         <div class="field" style="margin-bottom:14px">
-          <span class="fgl">Enrollment Type</span>
-          <label class="ci">
-            <input type="radio" name="enrollment_type" value="online_lectures" checked>
-            Online Lectures — $200
-          </label>
+          <label>Face Recognition <span class="req">*</span></label>
+          <input type="text" name="face_recognition" placeholder="Enter face recognition details" value="{{ old('face_recognition') }}" required>
+          @error('face_recognition')<span class="error-text">{{ $message }}</span>@enderror
         </div>
         
         <div class="field">

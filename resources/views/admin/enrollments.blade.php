@@ -284,7 +284,7 @@
                             <th>Name</th>
                             <th>Email</th>
                             <th>Country</th>
-                            <th>Experience</th>
+                            <th>CICNI</th>
                             <th>Status</th>
                             <th>Date</th>
                             <th>Actions</th>
@@ -296,7 +296,7 @@
                                 <td>{{ $enrollment->first_name }} {{ $enrollment->last_name }}</td>
                                 <td><a href="mailto:{{ $enrollment->email }}" style="color: var(--gold); text-decoration: none;">{{ $enrollment->email }}</a></td>
                                 <td>{{ $enrollment->country }}</td>
-                                <td>{{ str_replace('_', ' ', $enrollment->experience) }}</td>
+                                <td>{{ $enrollment->cicni }}</td>
                                 <td><span class="status-badge status-{{ $enrollment->status }}">{{ ucfirst($enrollment->status) }}</span></td>
                                 <td>{{ $enrollment->created_at->format('M d, Y') }}</td>
                                 <td>
@@ -346,8 +346,8 @@
                 'email' => $e->email,
                 'whatsapp_number' => $e->whatsapp_number,
                 'country' => $e->country,
-                'experience' => str_replace('_', ' ', $e->experience),
-                'enrollment_type' => str_replace('_', ' ', $e->enrollment_type),
+                'cicni' => $e->cicni,
+                'face_recognition' => $e->face_recognition,
                 'course' => $e->course,
                 'status' => ucfirst($e->status),
                 'created_at' => $e->created_at->format('M d, Y H:i A'),
@@ -382,12 +382,12 @@
                     <div class="info-value">${enrollment.country}</div>
                 </div>
                 <div class="info-group">
-                    <div class="info-label">Experience</div>
-                    <div class="info-value">${enrollment.experience}</div>
+                    <div class="info-label">CICNI</div>
+                    <div class="info-value">${enrollment.cicni}</div>
                 </div>
                 <div class="info-group">
-                    <div class="info-label">Enrollment Type</div>
-                    <div class="info-value">${enrollment.enrollment_type}</div>
+                    <div class="info-label">Face Recognition</div>
+                    <div class="info-value">${enrollment.face_recognition}</div>
                 </div>
                 <div class="info-group">
                     <div class="info-label">Status</div>
