@@ -16,10 +16,16 @@ class EnrollmentController extends Controller
     public function store(EnrollmentRequest $request)
     {
         $data = $request->validated();
+        $data['course'] = 'Advanced Liquidity Bootcamp Batch 23';
 
         if ($request->hasFile('payment_screenshot')) {
             $data['payment_screenshot'] = $request->file('payment_screenshot')
                 ->store('payment_screenshots', 'public');
+        }
+
+        if ($request->hasFile('face_photo')) {
+            $data['face_photo'] = $request->file('face_photo')
+                ->store('face_photos', 'public');
         }
 
         Enrollment::create($data);

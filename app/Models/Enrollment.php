@@ -11,7 +11,7 @@ class Enrollment extends Model
 
     protected $fillable = [
         'first_name', 'last_name', 'email', 'whatsapp_number',
-        'country', 'cicni', 'face_recognition',
+        'country', 'cicni', 'face_recognition', 'face_photo',
         'course', 'payment_screenshot', 'status',
     ];
 }

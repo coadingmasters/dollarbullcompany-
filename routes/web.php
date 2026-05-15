@@ -66,6 +66,10 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.Dashboard');
     })->name('admin.dashboard');
+
+    Route::get('/premium-group', function () {
+        return redirect()->route('enrollments.admin');
+    });
     
     // Enrollments Management
     Route::get('/enrollments', [EnrollmentController::class, 'adminIndex'])->name('enrollments.admin');
@@ -89,10 +93,6 @@ Route::get('/courses', function () {
     return view('frontend.courses', compact('courses'));
 })->name('courses.frontend');
 
-// Admin - Course Management
-Route::middleware('auth:admin')->prefix('admin')->group(function () {
-    Route::resource('courses', CourseController::class);
-});
 Route::get('/about',   fn() => view('about'))->name('about');
 Route::get('/contact', fn() => view('contact'))->name('contact');
 Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');

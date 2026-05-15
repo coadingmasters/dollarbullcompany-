@@ -535,7 +535,7 @@ body{background:var(--black);font-family:'Crimson Pro',Georgia,serif;color:var(-
 
         <div class="sb-label">Services</div>
 
-        <a href="{{ url('/admin/premium-group') }}" class="sb-item">
+        <a href="{{ route('enrollments.admin') }}" class="sb-item">
             <svg class="sb-item-icon" viewBox="0 0 24 24"><path d="M3 18h18M5 18l-1-9 5 4 3-7 3 7 5-4-1 9H5z" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span class="sb-item-text">Premium Group</span>
         </a>

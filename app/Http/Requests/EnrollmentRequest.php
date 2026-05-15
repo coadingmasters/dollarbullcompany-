@@ -17,8 +17,7 @@ class EnrollmentRequest extends FormRequest
             'whatsapp_number' => 'required|string|max:20',
             'country'         => 'required|string|max:100',
             'cicni'           => 'required|string|max:50',
-            'face_recognition' => 'required|string|max:255',
-            'course'          => 'required|string',
+            'face_photo'      => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
             'payment_screenshot' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
         ];
     }
