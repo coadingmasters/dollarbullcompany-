@@ -23,6 +23,14 @@
     .ls-join-meta .host { color: var(--gold-light); }
     .ls-leave { display: inline-block; margin-top: 20px; padding: 10px 24px; border: 1px solid rgba(192,57,43,.5); color: #e07b73; font-family: Cinzel, serif; font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; text-decoration: none; }
     .ls-leave:hover { background: rgba(192,57,43,.15); }
+    #audio-unblock {
+        display: none; position: absolute; inset: 0; z-index: 20;
+        background: rgba(0,0,0,.7); align-items: center; justify-content: center; flex-direction: column; gap: 12px;
+        cursor: pointer;
+    }
+    #audio-unblock.show { display: flex; }
+    #audio-unblock span { font-family: Cinzel, serif; font-size: .85rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-light); }
+    #audio-unblock svg { width: 40px; height: 40px; stroke: var(--gold); fill: none; stroke-width: 1.5; }
 </style>
 @endpush
 
@@ -32,6 +40,10 @@
 
     <div id="video-container">
         <p class="ls-loading" id="videoLoading">Connecting to live session...</p>
+        <div id="audio-unblock">
+            <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
+            <span>Tap to enable audio</span>
+        </div>
     </div>
 
     <div class="ls-join-meta">
@@ -55,8 +67,10 @@
     const uid         = @json($uid);
     const container   = document.getElementById('video-container');
     const loadingEl   = document.getElementById('videoLoading');
+    const audioUnblock = document.getElementById('audio-unblock');
 
-    let videoPlaying = false;
+    let videoPlaying  = false;
+    const audioTracks = []; // track all subscribed audio tracks
 
     function showStatus(text) {
         if (loadingEl) loadingEl.textContent = text;
@@ -70,10 +84,29 @@
     function renderVideo(user) {
         if (videoPlaying) return;
         videoPlaying = true;
-        container.innerHTML = '';
-        container.style.display = 'block'; // switch from flex to block so Agora fills 100% height
-        user.videoTrack.play(container);   // pass DOM element directly — more reliable than string ID
+        if (loadingEl) loadingEl.style.display = 'none';
+        container.style.display = 'block';
+        user.videoTrack.play(container);
     }
+
+    function playAudio(track) {
+        audioTracks.push(track);
+        track.play().catch(function () {
+            // Browser blocked autoplay — show tap-to-enable overlay
+            audioUnblock.classList.add('show');
+        });
+    }
+
+    // When user taps the overlay, resume all audio tracks
+    audioUnblock.addEventListener('click', function () {
+        audioUnblock.classList.remove('show');
+        audioTracks.forEach(function (t) { try { t.play(); } catch(e){} });
+    });
+
+    // Agora global autoplay-failed handler
+    AgoraRTC.onAutoplayFailed = function () {
+        audioUnblock.classList.add('show');
+    };
 
     if (!appId || !token || !channelName) {
         showMessage('Unable to connect to live session');
@@ -82,12 +115,12 @@
 
     const client = AgoraRTC.createClient({ mode: 'live', codec: 'vp8' });
 
-    // Register listeners BEFORE joining — catches events fired during join handshake
+    // Register listeners BEFORE joining
     client.on('user-published', async function (user, mediaType) {
         try {
             await client.subscribe(user, mediaType);
             if (mediaType === 'video') renderVideo(user);
-            if (mediaType === 'audio') user.audioTrack.play();
+            if (mediaType === 'audio') playAudio(user.audioTrack);
         } catch (e) {
             console.error('Subscribe error:', e);
         }
@@ -116,7 +149,7 @@
             }
             if (user.hasAudio) {
                 await client.subscribe(user, 'audio');
-                user.audioTrack.play();
+                playAudio(user.audioTrack);
             }
         } catch (e) {
             console.error('Manual subscribe error:', e);
@@ -128,8 +161,6 @@
             await client.setClientRole('audience', { level: 1 });
             await client.join(appId, channelName, token, uid);
 
-            // After join: manually subscribe to any host already streaming
-            // This handles the case where the host was live before we joined
             if (client.remoteUsers && client.remoteUsers.length > 0) {
                 for (const user of client.remoteUsers) {
                     await subscribeToUser(user);

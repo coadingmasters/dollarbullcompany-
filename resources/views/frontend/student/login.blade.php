@@ -25,7 +25,7 @@
         @if($errors->any())<div class="err">{{ $errors->first() }}</div>@endif
         <form method="POST" action="{{ route('student.login.submit') }}">
             @csrf
-            <input type="hidden" name="redirect" value="{{ $redirect ?? route('courses.frontend') }}">
+            <input type="hidden" name="redirect" value="{{ old('redirect', $redirect ?? route('courses.frontend')) }}">
             <label>Email</label>
             <input type="email" name="email" value="{{ old('email') }}" required>
             <label>Password</label>

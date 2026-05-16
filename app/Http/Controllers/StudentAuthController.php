@@ -24,7 +24,9 @@ class StudentAuthController extends Controller
         ]);
 
         if (! Auth::guard('student')->attempt($credentials, $request->boolean('remember'))) {
-            return back()->withErrors(['email' => 'Invalid email or password.'])->onlyInput('email');
+            return back()
+                ->withErrors(['email' => 'Invalid email or password.'])
+                ->withInput($request->only('email', 'redirect'));
         }
 
         $hasVerifiedCourse = CourseEnrollment::query()
@@ -42,7 +44,7 @@ class StudentAuthController extends Controller
 
             return back()
                 ->withErrors(['email' => 'Your enrollment is pending admin approval. You can log in after you are verified.'])
-                ->onlyInput('email');
+                ->withInput($request->only('email', 'redirect'));
         }
 
         $request->session()->regenerate();
