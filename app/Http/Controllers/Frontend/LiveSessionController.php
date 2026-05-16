@@ -89,25 +89,30 @@ class LiveSessionController extends Controller
 
     public function index()
     {
-        $userId = LiveSessionIdentity::currentUserId();
-
         $sessions = LiveSession::with('admin')->latest()->get();
 
-        $enrollments = LiveSessionEnrollment::where('user_id', $userId)
-            ->get()
-            ->keyBy('live_session_id');
+        $enrollments = collect();
+        if (auth('student')->check()) {
+            $userId = LiveSessionIdentity::currentUserId();
+            $enrollments = LiveSessionEnrollment::where('user_id', $userId)
+                ->get()
+                ->keyBy('live_session_id');
+        }
 
         return view('frontend.live-sessions.index', compact('sessions', 'enrollments'));
     }
 
     public function show($id)
     {
-        $userId = LiveSessionIdentity::currentUserId();
-
         $session = LiveSession::with('admin')->findOrFail($id);
-        $enrollment = LiveSessionEnrollment::where('live_session_id', $id)
-            ->where('user_id', $userId)
-            ->first();
+
+        $enrollment = null;
+        if (auth('student')->check()) {
+            $userId = LiveSessionIdentity::currentUserId();
+            $enrollment = LiveSessionEnrollment::where('live_session_id', $id)
+                ->where('user_id', $userId)
+                ->first();
+        }
 
         return view('frontend.live-sessions.show', compact('session', 'enrollment'));
     }

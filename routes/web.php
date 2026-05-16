@@ -143,16 +143,17 @@ Route::get('/contact', fn() => view('contact'))->name('contact');
 // Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
 
 
-// Frontend Live Session Routes
+// Frontend Live Session Routes — public (no auth required)
 Route::prefix('live-sessions')->name('live-sessions.')->group(function () {
+    Route::get('/', [FrontendLiveSessionController::class, 'index'])->name('index');
     Route::get('/{id}/register', [FrontendLiveSessionController::class, 'showRegister'])->name('register');
     Route::post('/{id}/register', [FrontendLiveSessionController::class, 'register'])->name('register.store');
     Route::get('/{id}/register/success', [FrontendLiveSessionController::class, 'registerSuccess'])->name('register.success');
+    Route::get('/{id}', [FrontendLiveSessionController::class, 'show'])->name('show');
 });
 
+// Frontend Live Session Routes — auth required
 Route::prefix('live-sessions')->middleware(['auth:student'])->name('live-sessions.')->group(function () {
-    Route::get('/', [FrontendLiveSessionController::class, 'index'])->name('index');
-    Route::get('/{id}', [FrontendLiveSessionController::class, 'show'])->name('show');
     Route::post('/{id}/enroll', [FrontendLiveSessionController::class, 'enroll'])->name('enroll');
     Route::get('/{id}/join', [FrontendLiveSessionController::class, 'join'])
         ->middleware('enrollment.approved')
