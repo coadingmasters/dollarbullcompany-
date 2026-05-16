@@ -162,7 +162,7 @@ class LiveSessionController extends Controller
 
         $appId = config('services.agora.app_id');
         $channelName = $session->agora_channel_name;
-        $uid = $userId;
+        $uid = 0; // 0 = Agora auto-assigns a unique UID, avoids conflicts with host UID
 
         try {
             $token = app(AgoraTokenService::class)->generateToken(
