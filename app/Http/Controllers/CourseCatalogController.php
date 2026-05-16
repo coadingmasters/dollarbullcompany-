@@ -45,7 +45,7 @@ class CourseCatalogController extends Controller
                 'level' => ucfirst($course->level),
                 'level_raw' => $course->level,
                 'duration' => $course->duration_in_weeks ? $course->duration_in_weeks . 'w' : 'Flex',
-                'thumbnail' => $course->thumbnail ? asset('storage/' . $course->thumbnail) : null,
+                'thumbnail' => $course->thumbnail_url,
                 'videos_count' => $course->videos_count,
                 'enroll_url' => route('courses.enroll.show', $course),
                 'learn_url' => route('courses.learn', $course),

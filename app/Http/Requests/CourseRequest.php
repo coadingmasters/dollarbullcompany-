@@ -23,7 +23,7 @@ class CourseRequest extends FormRequest
 
             'price' => 'required|numeric|min:0',
 
-            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:' . config('courses.thumbnail_max_kb', 5120),
 
             'level' => 'required|in:beginner,intermediate,advanced',
 

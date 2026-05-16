@@ -559,7 +559,7 @@ body{background:var(--black);font-family:'Crimson Pro',Georgia,serif;color:var(-
             <svg class="sb-item-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
             <span class="sb-item-text">Course Students</span>
         </a>
-        <a href="{{ url('/admin/live-sessions') }}" class="sb-item">
+        <a href="{{ route('admin.live-sessions.index') }}" class="sb-item {{ request()->routeIs('admin.live-sessions.*') ? 'active' : '' }}">
             <svg class="sb-item-icon" viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="10" rx="1"/><path d="M17 9l5-2v10l-5-2V9z"/></svg>
             <span class="sb-item-text">Live Sessions</span>
         </a>
@@ -666,6 +666,9 @@ body{background:var(--black);font-family:'Crimson Pro',Georgia,serif;color:var(-
 
         @if(session('success'))
             <div class="admin-alert admin-alert-success">{{ session('success') }}</div>
+        @endif
+        @if(session('error'))
+            <div class="admin-alert" style="border-left-color:var(--red);background:rgba(239,68,68,.08);color:#fca5a5">{{ session('error') }}</div>
         @endif
         @if($errors->any())
             <div class="admin-alert" style="border-left-color:var(--red)">

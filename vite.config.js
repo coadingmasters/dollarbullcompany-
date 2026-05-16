@@ -4,6 +4,7 @@ import { bunny } from 'laravel-vite-plugin/fonts';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
+    envPrefix: ['VITE_'],
     plugins: [
         laravel({
             input: [

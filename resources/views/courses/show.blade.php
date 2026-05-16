@@ -261,8 +261,8 @@
 
         <div class="course-hero">
             <div class="course-image">
-                @if($course->thumbnail)
-                    <img src="{{ asset('storage/' . $course->thumbnail) }}" alt="{{ $course->title }}">
+                @if($course->thumbnail_url)
+                    <img src="{{ $course->thumbnail_url }}" alt="{{ $course->title }}">
                 @else
                     📚
                 @endif

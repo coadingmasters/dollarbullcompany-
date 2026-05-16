@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CourseRequest;
 use App\Models\Course;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CourseController extends Controller
@@ -25,8 +26,9 @@ class CourseController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')
-                ->store('course_thumbnails', 'public');
+            $data['thumbnail'] = $request->file('thumbnail')->store('course_thumbnails', 'public');
+        } else {
+            unset($data['thumbnail']);
         }
 
         $data['slug'] = Str::slug($data['slug']);
@@ -57,8 +59,13 @@ class CourseController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')
-                ->store('course_thumbnails', 'public');
+            if ($course->thumbnail) {
+                Storage::disk('public')->delete($course->thumbnail);
+            }
+
+            $data['thumbnail'] = $request->file('thumbnail')->store('course_thumbnails', 'public');
+        } else {
+            unset($data['thumbnail']);
         }
 
         $data['is_featured'] = $request->has('is_featured');

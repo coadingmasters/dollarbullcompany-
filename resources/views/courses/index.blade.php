@@ -40,8 +40,8 @@
             @foreach($courses as $course)
                 <article class="course-card">
                     <div class="course-thumbnail">
-                        @if($course->thumbnail)
-                            <img src="{{ asset('storage/' . $course->thumbnail) }}" alt="{{ $course->title }}">
+                        @if($course->thumbnail_url)
+                            <img src="{{ $course->thumbnail_url }}" alt="{{ $course->title }}">
                         @else
                             📖
                         @endif

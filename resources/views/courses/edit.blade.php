@@ -282,9 +282,9 @@
 
             <div class="form-group">
                 <label>Feature image (course thumbnail)</label>
-                @if($course->thumbnail)
+                @if($course->thumbnail_url)
                     <div class="thumbnail-preview">
-                        <img src="{{ asset('storage/' . $course->thumbnail) }}" alt="{{ $course->title }}">
+                        <img src="{{ $course->thumbnail_url }}" alt="{{ $course->title }}">
                     </div>
                 @endif
                 <input type="file" name="thumbnail" accept="image/*">

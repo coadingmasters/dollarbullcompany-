@@ -39,14 +39,14 @@
             <aside class="sidebar">
                 <p style="font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.15em;color:var(--gold);margin-bottom:12px;text-transform:uppercase">Lessons</p>
                 @foreach($course->videos as $video)
-                    <button type="button" class="lesson {{ $loop->first ? 'active' : '' }}" data-src="{{ asset('storage/'.$video->video_path) }}" data-title="{{ $video->title }}">
+                    <button type="button" class="lesson {{ $loop->first ? 'active' : '' }}" data-src="{{ $video->video_url }}" data-title="{{ $video->title }}">
                         {{ $loop->iteration }}. {{ $video->title }}
                     </button>
                 @endforeach
             </aside>
             <main class="player">
                 <h2 id="lessonTitle">{{ $course->videos->first()->title }}</h2>
-                <video id="lessonPlayer" controls playsinline src="{{ asset('storage/'.$course->videos->first()->video_path) }}"></video>
+                <video id="lessonPlayer" controls playsinline src="{{ $course->videos->first()->video_url }}"></video>
             </main>
         </div>
     @endif

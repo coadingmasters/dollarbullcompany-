@@ -9,53 +9,55 @@ use App\Http\Controllers\CourseLearnController;
 use App\Http\Controllers\StudentAuthController;
 use App\Http\Controllers\Admin\CourseVideoController;
 use App\Http\Controllers\Admin\CourseVideoHubController;
+use App\Http\Controllers\Admin\LiveSessionController as AdminLiveSessionController;
+use App\Http\Controllers\Frontend\LiveSessionController as FrontendLiveSessionController;
 
 
 Route::get('/', function () {
     $slides = [
         [
-            'image'      => 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=1800&q=80',
-            'badge'      => 'Welcome to CryptoOnly',
-            'headline'   => 'The Future of Digital',
-            'highlight'  => 'Finance Is Here',
-            'sub'        => 'Trade, invest and grow your crypto portfolio with institutional-grade tools built for the modern investor.',
+            'image' => 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=1800&q=80',
+            'badge' => 'Welcome to CryptoOnly',
+            'headline' => 'The Future of Digital',
+            'highlight' => 'Finance Is Here',
+            'sub' => 'Trade, invest and grow your crypto portfolio with institutional-grade tools built for the modern investor.',
             'btn1_label' => 'Start Trading',
-            'btn1_url'   => '/register',
+            'btn1_url' => '/register',
             'btn2_label' => 'Explore Markets',
-            'btn2_url'   => '/markets',
+            'btn2_url' => '/markets',
         ],
         [
-            'image'      => 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=1800&q=80',
-            'badge'      => 'Bitcoin & Beyond',
-            'headline'   => 'Secure Your Wealth in',
-            'highlight'  => 'Digital Gold',
-            'sub'        => 'Bitcoin remains the most trusted store of value in crypto history. Invest with confidence on our fully regulated platform.',
+            'image' => 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=1800&q=80',
+            'badge' => 'Bitcoin & Beyond',
+            'headline' => 'Secure Your Wealth in',
+            'highlight' => 'Digital Gold',
+            'sub' => 'Bitcoin remains the most trusted store of value in crypto history. Invest with confidence on our fully regulated platform.',
             'btn1_label' => 'Buy Bitcoin',
-            'btn1_url'   => '/bitcoin',
+            'btn1_url' => '/bitcoin',
             'btn2_label' => 'Learn More',
-            'btn2_url'   => '/about',
+            'btn2_url' => '/about',
         ],
         [
-            'image'      => 'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=1800&q=80',
-            'badge'      => 'DeFi & Web3',
-            'headline'   => 'Decentralised Finance',
-            'highlight'  => 'Without Limits',
-            'sub'        => 'Access DeFi protocols, yield farming, and Web3 innovations — all managed from one unified, secure dashboard.',
+            'image' => 'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=1800&q=80',
+            'badge' => 'DeFi & Web3',
+            'headline' => 'Decentralised Finance',
+            'highlight' => 'Without Limits',
+            'sub' => 'Access DeFi protocols, yield farming, and Web3 innovations — all managed from one unified, secure dashboard.',
             'btn1_label' => 'Explore DeFi',
-            'btn1_url'   => '/defi',
+            'btn1_url' => '/defi',
             'btn2_label' => 'View Portfolio',
-            'btn2_url'   => '/portfolio',
+            'btn2_url' => '/portfolio',
         ],
         [
-            'image'      => 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1800&q=80',
-            'badge'      => 'Real-Time Analytics',
-            'headline'   => 'Trade Smarter with',
-            'highlight'  => 'Live Market Data',
-            'sub'        => 'Real-time charts, AI-powered signals and deep market data give you the decisive edge in every trade you make.',
+            'image' => 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1800&q=80',
+            'badge' => 'Real-Time Analytics',
+            'headline' => 'Trade Smarter with',
+            'highlight' => 'Live Market Data',
+            'sub' => 'Real-time charts, AI-powered signals and deep market data give you the decisive edge in every trade you make.',
             'btn1_label' => 'Live Markets',
-            'btn1_url'   => '/markets',
+            'btn1_url' => '/markets',
             'btn2_label' => 'Get Started',
-            'btn2_url'   => '/register',
+            'btn2_url' => '/register',
         ],
     ];
 
@@ -76,7 +78,7 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::get('/premium-group', function () {
         return redirect()->route('enrollments.admin');
     });
-    
+
     // Enrollments Management
     Route::get('/enrollments', [EnrollmentController::class, 'adminIndex'])->name('enrollments.admin');
     Route::patch('/enrollments/{enrollment}/verify', [EnrollmentController::class, 'verify'])->name('enrollments.verify');
@@ -85,7 +87,7 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::get('/course-enrollments', [CourseEnrollmentController::class, 'adminIndex'])->name('course-enrollments.admin');
     Route::patch('/course-enrollments/{courseEnrollment}/verify', [CourseEnrollmentController::class, 'verify'])->name('course-enrollments.verify');
     Route::patch('/course-enrollments/{courseEnrollment}/reject', [CourseEnrollmentController::class, 'reject'])->name('course-enrollments.reject');
-    
+
     // Course Management
     Route::resource('courses', CourseController::class);
     Route::get('course-videos', [CourseVideoHubController::class, 'index'])->name('admin.course-videos.index');
@@ -93,6 +95,22 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
 
     Route::post('courses/{course}/videos', [CourseVideoController::class, 'store'])->name('courses.videos.store');
     Route::delete('courses/{course}/videos/{video}', [CourseVideoController::class, 'destroy'])->name('courses.videos.destroy');
+
+    Route::resource('live-sessions', AdminLiveSessionController::class)->parameters([
+        'live-sessions' => 'id',
+    ])->names([
+        'index' => 'admin.live-sessions.index',
+        'create' => 'admin.live-sessions.create',
+        'store' => 'admin.live-sessions.store',
+        'show' => 'admin.live-sessions.show',
+        'edit' => 'admin.live-sessions.edit',
+        'update' => 'admin.live-sessions.update',
+        'destroy' => 'admin.live-sessions.destroy',
+    ]);
+    Route::post('live-sessions/{id}/go-live', [AdminLiveSessionController::class, 'goLive'])->name('admin.live-sessions.go-live');
+    Route::post('live-sessions/{id}/end', [AdminLiveSessionController::class, 'endSession'])->name('admin.live-sessions.end');
+    Route::post('live-sessions/{id}/enrollments/{enrollmentId}/approve', [AdminLiveSessionController::class, 'approveEnrollment'])->name('admin.live-sessions.enrollments.approve');
+    Route::post('live-sessions/{id}/enrollments/{enrollmentId}/reject', [AdminLiveSessionController::class, 'rejectEnrollment'])->name('admin.live-sessions.enrollments.reject');
 });
 Route::get('/premium-group', function () {
     return view('frontend.premiumgroup');
@@ -119,6 +137,17 @@ Route::post('/student/login', [StudentAuthController::class, 'login'])->name('st
 Route::post('/student/logout', [StudentAuthController::class, 'logout'])->name('student.logout');
 Route::redirect('/student/register', '/courses', 301)->name('student.register');
 
-Route::get('/about',   fn() => view('about'))->name('about');
+Route::get('/about', fn() => view('about'))->name('about');
 Route::get('/contact', fn() => view('contact'))->name('contact');
 // Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
+
+
+// Frontend Live Session Routes
+Route::prefix('live-sessions')->middleware(['auth'])->name('live-sessions.')->group(function () {
+    Route::get('/', [FrontendLiveSessionController::class, 'index'])->name('index');
+    Route::get('/{id}', [FrontendLiveSessionController::class, 'show'])->name('show');
+    Route::post('/{id}/enroll', [FrontendLiveSessionController::class, 'enroll'])->name('enroll');
+    Route::get('/{id}/join', [FrontendLiveSessionController::class, 'join'])
+        ->middleware('enrollment.approved')
+        ->name('join');
+});
