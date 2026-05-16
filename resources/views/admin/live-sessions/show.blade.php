@@ -13,6 +13,9 @@
         </form>
     @endif
     @if($session->isLive())
+        <a href="{{ route('admin.live-sessions.broadcast', $session->id) }}" class="btn-sm btn-gold" style="background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.5);color:#86efac">
+            ● Enter Broadcast Studio
+        </a>
         <form method="POST" action="{{ route('admin.live-sessions.end', $session->id) }}" style="display:inline">
             @csrf
             <button type="submit" class="btn-sm btn-outline-gold" style="color:#fca5a5;border-color:rgba(239,68,68,.4)">End Session</button>

@@ -163,11 +163,17 @@ class LiveSessionController extends Controller
         $appId = config('services.agora.app_id');
         $channelName = $session->agora_channel_name;
         $uid = $userId;
-        $token = app(AgoraTokenService::class)->generateToken(
-            $channelName,
-            $uid,
-            AgoraTokenService::ROLE_AUDIENCE
-        );
+
+        try {
+            $token = app(AgoraTokenService::class)->generateToken(
+                $channelName,
+                $uid,
+                AgoraTokenService::ROLE_AUDIENCE
+            );
+        } catch (\RuntimeException $e) {
+            return redirect()->route('live-sessions.show', $id)
+                ->with('error', 'Live session is temporarily unavailable. Please contact support.');
+        }
 
         return view('frontend.live-sessions.join', compact(
             'session',

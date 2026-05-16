@@ -112,6 +112,7 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         'destroy' => 'admin.live-sessions.destroy',
     ]);
     Route::post('live-sessions/{id}/go-live', [AdminLiveSessionController::class, 'goLive'])->name('admin.live-sessions.go-live');
+    Route::get('live-sessions/{id}/broadcast', [AdminLiveSessionController::class, 'broadcast'])->name('admin.live-sessions.broadcast');
     Route::post('live-sessions/{id}/end', [AdminLiveSessionController::class, 'endSession'])->name('admin.live-sessions.end');
     Route::post('live-sessions/{id}/enrollments/{enrollmentId}/approve', [AdminLiveSessionController::class, 'approveEnrollment'])->name('admin.live-sessions.enrollments.approve');
     Route::post('live-sessions/{id}/enrollments/{enrollmentId}/reject', [AdminLiveSessionController::class, 'rejectEnrollment'])->name('admin.live-sessions.enrollments.reject');

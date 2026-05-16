@@ -7,6 +7,7 @@ use App\Models\LiveSession;
 use App\Models\LiveSessionEnrollment;
 use App\Events\SessionWentLive;
 use App\Events\SessionEnded;
+use App\Services\AgoraTokenService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -89,7 +90,8 @@ class LiveSessionController extends Controller
         $session = LiveSession::findOrFail($id);
 
         if ($session->isLive()) {
-            return back()->with('error', 'Session is already live');
+            return redirect()->route('admin.live-sessions.broadcast', $id)
+                ->with('info', 'Session is already live.');
         }
 
         $session->update([
@@ -99,7 +101,40 @@ class LiveSessionController extends Controller
 
         broadcast(new SessionWentLive($session));
 
-        return back()->with('success', 'Session is now live');
+        return redirect()->route('admin.live-sessions.broadcast', $id)
+            ->with('success', 'Session is now live — your broadcast studio is ready.');
+    }
+
+    public function broadcast($id)
+    {
+        $session = LiveSession::findOrFail($id);
+
+        if (! $session->isLive()) {
+            return redirect()->route('admin.live-sessions.show', $id)
+                ->with('error', 'Session is not live yet. Click Go Live first.');
+        }
+
+        try {
+            $appId       = config('services.agora.app_id');
+            $channelName = $session->agora_channel_name;
+            $uid         = (int) auth('admin')->id();
+            $token       = app(AgoraTokenService::class)->generateToken(
+                $channelName,
+                $uid,
+                AgoraTokenService::ROLE_HOST
+            );
+        } catch (\RuntimeException $e) {
+            return redirect()->route('admin.live-sessions.show', $id)
+                ->with('error', 'Agora credentials are not configured. Cannot start broadcast.');
+        }
+
+        $approvedCount = LiveSessionEnrollment::where('live_session_id', $id)
+            ->where('status', 'approved')
+            ->count();
+
+        return view('admin.live-sessions.broadcast', compact(
+            'session', 'appId', 'channelName', 'token', 'uid', 'approvedCount'
+        ));
     }
 
     public function endSession($id)
