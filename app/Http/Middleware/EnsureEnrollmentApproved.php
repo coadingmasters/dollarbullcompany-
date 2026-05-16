@@ -19,7 +19,7 @@ class EnsureEnrollmentApproved
             ->where('status', 'approved')
             ->first();
 
-        if (! $enrollment) {
+        if (!$enrollment) {
             return redirect()->back()->with('error', 'You do not have approved access to this session');
         }
 

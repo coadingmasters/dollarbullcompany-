@@ -601,9 +601,9 @@ body{background:var(--black);font-family:'Crimson Pro',Georgia,serif;color:var(-
 
     {{-- Admin user --}}
     <div class="sb-user">
-        <div class="sb-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}</div>
+        <div class="sb-avatar">{{ strtoupper(substr(auth('admin')->user()?->name ?? 'A', 0, 1)) }}</div>
         <div class="sb-user-info">
-            <div class="sb-user-name">{{ auth()->user()->name ?? 'Admin' }}</div>
+            <div class="sb-user-name">{{ auth('admin')->user()?->name ?? 'Admin' }}</div>
             <div class="sb-user-role">Super Admin</div>
         </div>
     </div>
