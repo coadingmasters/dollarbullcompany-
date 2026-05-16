@@ -37,13 +37,13 @@
                 @error('description')<div class="ls-field-error">{{ $message }}</div>@enderror
             </div>
 
-            <div class="ls-form-group">
-                <label for="scheduled_at">Scheduled Date &amp; Time</label>
-                <input type="datetime-local" id="scheduled_at" name="scheduled_at" value="{{ old('scheduled_at') }}">
-                @error('scheduled_at')<div class="ls-field-error">{{ $message }}</div>@enderror
-            </div>
+            @include('admin.live-sessions.partials.scheduled-at-field', [
+                'value' => old('scheduled_at'),
+            ])
 
             <button type="submit" class="btn-sm btn-gold">Create Session</button>
         </form>
     </div>
 @endsection
+
+@include('admin.live-sessions.partials.flatpickr-assets')
