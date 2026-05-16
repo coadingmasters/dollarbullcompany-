@@ -72,6 +72,7 @@
                                             </form>
                                         @endif
                                         @if($session->isLive())
+                                            <a href="{{ route('admin.live-sessions.broadcast', $session->id) }}" class="btn-sm btn-live">● Broadcast Studio</a>
                                             <form method="POST" action="{{ route('admin.live-sessions.end', $session->id) }}">
                                                 @csrf
                                                 <button type="submit" class="btn-sm btn-end">End Session</button>

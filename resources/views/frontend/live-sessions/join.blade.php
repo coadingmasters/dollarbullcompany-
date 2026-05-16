@@ -48,15 +48,18 @@
 @push('scripts')
 <script>
 (function () {
-    const appId = @json($appId);
+    const appId       = @json($appId);
     const channelName = @json($channelName);
-    const token = @json($token);
-    const uid = @json($uid);
-    const container = document.getElementById('video-container');
-    const loadingEl = document.getElementById('videoLoading');
+    const token       = @json($token);
+    const uid         = @json($uid);
+    const container   = document.getElementById('video-container');
+    const loadingEl   = document.getElementById('videoLoading');
+
+    function showStatus(text) {
+        if (loadingEl) loadingEl.textContent = text;
+    }
 
     function showMessage(text) {
-        if (loadingEl) loadingEl.remove();
         container.innerHTML = '<p class="ls-msg">' + text + '</p>';
     }
 
@@ -67,33 +70,54 @@
 
     const client = AgoraRTC.createClient({ mode: 'live', codec: 'vp8' });
 
-    client.setClientRole('audience').then(function () {
-        return client.join(appId, channelName, token, uid);
-    }).then(function () {
-        client.on('user-published', async function (user, mediaType) {
+    // Register ALL event listeners BEFORE joining so no events are missed
+    client.on('user-published', async function (user, mediaType) {
+        try {
             await client.subscribe(user, mediaType);
+
             if (mediaType === 'video') {
-                if (loadingEl) loadingEl.remove();
+                container.innerHTML = '';
                 const player = document.createElement('div');
                 player.id = 'remote-player';
-                container.innerHTML = '';
+                player.style.cssText = 'width:100%;height:100%;min-height:500px';
                 container.appendChild(player);
                 user.videoTrack.play('remote-player');
             }
             if (mediaType === 'audio') {
                 user.audioTrack.play();
             }
-        });
-
-        client.on('user-unpublished', function (user, mediaType) {
-            if (mediaType === 'video') {
-                showMessage('Stream has ended');
-            }
-        });
-    }).catch(function (err) {
-        console.error(err);
-        showMessage('Unable to connect to live session');
+        } catch (e) {
+            console.error('Subscribe error:', e);
+        }
     });
+
+    client.on('user-unpublished', function (user, mediaType) {
+        if (mediaType === 'video') {
+            container.innerHTML = '<p class="ls-msg">Host paused the video</p>';
+        }
+    });
+
+    client.on('user-left', function () {
+        showMessage('Host has left the session');
+    });
+
+    client.on('connection-state-change', function (curState) {
+        if (curState === 'CONNECTED') showStatus('Waiting for host stream...');
+        else if (curState === 'DISCONNECTED') showMessage('Disconnected from session');
+    });
+
+    async function joinSession() {
+        try {
+            await client.setClientRole('audience');
+            await client.join(appId, channelName, token, uid);
+            showStatus('Connected — waiting for host to stream...');
+        } catch (err) {
+            console.error('Join error:', err);
+            showMessage('Unable to connect: ' + (err.message || err.code || 'Unknown error'));
+        }
+    }
+
+    joinSession();
 })();
 </script>
 @endpush
