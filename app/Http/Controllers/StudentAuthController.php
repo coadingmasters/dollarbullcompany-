@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CourseEnrollment;
+use App\Models\LiveSessionEnrollment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -26,12 +27,17 @@ class StudentAuthController extends Controller
             return back()->withErrors(['email' => 'Invalid email or password.'])->onlyInput('email');
         }
 
-        $hasVerified = CourseEnrollment::query()
+        $hasVerifiedCourse = CourseEnrollment::query()
             ->where('email', $credentials['email'])
             ->where('status', 'verified')
             ->exists();
 
-        if (! $hasVerified) {
+        $hasApprovedLiveSession = LiveSessionEnrollment::query()
+            ->where('email', $credentials['email'])
+            ->where('status', 'approved')
+            ->exists();
+
+        if (! $hasVerifiedCourse && ! $hasApprovedLiveSession) {
             Auth::guard('student')->logout();
 
             return back()

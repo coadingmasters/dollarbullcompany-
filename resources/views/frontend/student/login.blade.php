@@ -35,7 +35,8 @@
             </label>
             <button type="submit">Log in</button>
         </form>
-        <p style="margin-top:20px">Not enrolled yet? <a href="{{ route('courses.frontend') }}">Browse courses &amp; enroll</a></p>
+        <p style="margin-top:20px">Not registered yet? <a href="{{ route('live-sessions.index') }}">Register for a live session</a></p>
+        <p style="margin-top:8px">Looking for courses? <a href="{{ route('courses.frontend') }}">Browse courses &amp; enroll</a></p>
     </div>
 </div>
 @endsection

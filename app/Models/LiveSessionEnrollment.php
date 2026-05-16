@@ -12,6 +12,14 @@ class LiveSessionEnrollment extends Model
         'status',
         'enrolled_at',
         'approved_at',
+        'first_name',
+        'last_name',
+        'email',
+        'whatsapp_number',
+        'country',
+        'cicni',
+        'face_photo',
+        'payment_screenshot',
     ];
 
     protected $casts = [

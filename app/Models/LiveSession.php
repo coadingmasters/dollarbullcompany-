@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Admin;
 
 class LiveSession extends Model
 {
@@ -25,7 +26,7 @@ class LiveSession extends Model
 
     public function admin()
     {
-        return $this->belongsTo(User::class, 'admin_id');
+        return $this->belongsTo(Admin::class, 'admin_id');
     }
 
     public function enrollments()

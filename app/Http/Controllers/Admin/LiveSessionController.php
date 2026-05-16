@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\LiveSession;
 use App\Models\LiveSessionEnrollment;
-use App\Models\User;
 use App\Events\SessionWentLive;
 use App\Events\SessionEnded;
 use Illuminate\Http\Request;
@@ -38,7 +37,7 @@ class LiveSessionController extends Controller
             'title' => $request->title,
             'description' => $request->description,
             'scheduled_at' => $request->scheduled_at,
-            'admin_id' => $this->resolveHostUserId(),
+            'admin_id' => auth('admin')->id(),
             'agora_channel_name' => Str::slug($request->title) . '-' . Str::random(6),
         ]);
 
@@ -136,14 +135,4 @@ class LiveSessionController extends Controller
         return back()->with('success', 'Enrollment rejected');
     }
 
-    protected function resolveHostUserId(): int
-    {
-        $userId = User::query()->value('id');
-
-        if (! $userId) {
-            abort(500, 'Create at least one user record before scheduling live sessions.');
-        }
-
-        return (int) $userId;
-    }
 }

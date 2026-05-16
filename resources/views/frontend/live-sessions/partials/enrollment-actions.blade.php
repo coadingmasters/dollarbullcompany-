@@ -6,10 +6,14 @@
     @if($session->isEnded())
         <span class="ls-pill ls-pill-muted">Session Ended</span>
     @elseif(!$enrollment)
-        <form method="POST" action="{{ route('live-sessions.enroll', $session->id) }}">
-            @csrf
-            <button type="submit" class="btn ls-btn-primary">Enroll Now</button>
-        </form>
+        @guest('student')
+            <a href="{{ route('live-sessions.register', $session->id) }}" class="btn ls-btn-primary">Register Now</a>
+        @else
+            <form method="POST" action="{{ route('live-sessions.enroll', $session->id) }}">
+                @csrf
+                <button type="submit" class="btn ls-btn-primary">Enroll Now</button>
+            </form>
+        @endguest
     @elseif($enrollment->isPending())
         <span class="ls-pill ls-pill-pending">Pending Approval</span>
     @elseif($enrollment->isRejected())
