@@ -55,12 +55,26 @@
     const container   = document.getElementById('video-container');
     const loadingEl   = document.getElementById('videoLoading');
 
+    let videoPlaying = false;
+
     function showStatus(text) {
         if (loadingEl) loadingEl.textContent = text;
     }
 
     function showMessage(text) {
+        videoPlaying = false;
         container.innerHTML = '<p class="ls-msg">' + text + '</p>';
+    }
+
+    function renderVideo(user) {
+        if (videoPlaying) return;
+        videoPlaying = true;
+        container.innerHTML = '';
+        const player = document.createElement('div');
+        player.id = 'remote-player';
+        player.style.cssText = 'width:100%;height:100%;min-height:500px';
+        container.appendChild(player);
+        user.videoTrack.play('remote-player');
     }
 
     if (!appId || !token || !channelName) {
@@ -70,22 +84,12 @@
 
     const client = AgoraRTC.createClient({ mode: 'live', codec: 'vp8' });
 
-    // Register ALL event listeners BEFORE joining so no events are missed
+    // Register listeners BEFORE joining — catches events fired during join handshake
     client.on('user-published', async function (user, mediaType) {
         try {
             await client.subscribe(user, mediaType);
-
-            if (mediaType === 'video') {
-                container.innerHTML = '';
-                const player = document.createElement('div');
-                player.id = 'remote-player';
-                player.style.cssText = 'width:100%;height:100%;min-height:500px';
-                container.appendChild(player);
-                user.videoTrack.play('remote-player');
-            }
-            if (mediaType === 'audio') {
-                user.audioTrack.play();
-            }
+            if (mediaType === 'video') renderVideo(user);
+            if (mediaType === 'audio') user.audioTrack.play();
         } catch (e) {
             console.error('Subscribe error:', e);
         }
@@ -93,24 +97,50 @@
 
     client.on('user-unpublished', function (user, mediaType) {
         if (mediaType === 'video') {
-            container.innerHTML = '<p class="ls-msg">Host paused the video</p>';
+            videoPlaying = false;
+            showStatus('Host paused the video...');
         }
     });
 
     client.on('user-left', function () {
-        showMessage('Host has left the session');
+        showMessage('Host has ended the session');
     });
 
     client.on('connection-state-change', function (curState) {
-        if (curState === 'CONNECTED') showStatus('Waiting for host stream...');
-        else if (curState === 'DISCONNECTED') showMessage('Disconnected from session');
+        if (curState === 'DISCONNECTED') showMessage('Disconnected from session');
     });
+
+    async function subscribeToUser(user) {
+        try {
+            if (user.hasVideo) {
+                await client.subscribe(user, 'video');
+                renderVideo(user);
+            }
+            if (user.hasAudio) {
+                await client.subscribe(user, 'audio');
+                user.audioTrack.play();
+            }
+        } catch (e) {
+            console.error('Manual subscribe error:', e);
+        }
+    }
 
     async function joinSession() {
         try {
-            await client.setClientRole('audience');
+            await client.setClientRole('audience', { level: 1 });
             await client.join(appId, channelName, token, uid);
-            showStatus('Connected — waiting for host to stream...');
+
+            // After join: manually subscribe to any host already streaming
+            // This handles the case where the host was live before we joined
+            if (client.remoteUsers && client.remoteUsers.length > 0) {
+                for (const user of client.remoteUsers) {
+                    await subscribeToUser(user);
+                }
+            }
+
+            if (!videoPlaying) {
+                showStatus('Connected — waiting for host to stream...');
+            }
         } catch (err) {
             console.error('Join error:', err);
             showMessage('Unable to connect: ' + (err.message || err.code || 'Unknown error'));
