@@ -24,9 +24,19 @@ return Application::configure(basePath: dirname(__DIR__))
                 return route('admin.login');
             }
 
-            return route('student.login', [
-                'redirect' => $request->fullUrl(),
-            ]);
+            if ($request->is('live-sessions') || $request->is('live-sessions/*')) {
+                return route('student.login', [
+                    'redirect' => $request->fullUrl(),
+                ]);
+            }
+
+            if ($request->is('courses/*/learn')) {
+                return route('student.login', [
+                    'redirect' => $request->fullUrl(),
+                ]);
+            }
+
+            return route('student.login');
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {

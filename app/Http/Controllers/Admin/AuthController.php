@@ -13,6 +13,12 @@ class AuthController extends Controller
      */
     public function showLoginForm()
     {
+        $intended = session('url.intended');
+
+        if ($intended && ! str_contains($intended, '/admin')) {
+            session()->forget('url.intended');
+        }
+
         return view('admin.auth.login');
     }
 
@@ -25,7 +31,15 @@ public function login(Request $request)
     $credentials = $request->only('email', 'password');
 
     if (Auth::guard('admin')->attempt($credentials)) {
-        return redirect()->intended(route('admin.dashboard'));
+        $request->session()->regenerate();
+
+        $intended = session()->pull('url.intended');
+
+        if ($intended && str_contains($intended, '/admin')) {
+            return redirect()->to($intended);
+        }
+
+        return redirect()->route('admin.dashboard');
     }
 
     return back()->withErrors(['email' => 'Invalid credentials']);
