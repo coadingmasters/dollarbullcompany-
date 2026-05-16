@@ -291,7 +291,7 @@
             </div>
 
             <div class="form-group">
-                <label>Thumbnail Image</label>
+                <label>Feature image (course thumbnail)</label>
                 @if($course->thumbnail)
                     <div class="thumbnail-preview">
                         <img src="{{ asset('storage/' . $course->thumbnail) }}" alt="{{ $course->title }}">
@@ -305,6 +305,8 @@
                 <input type="checkbox" id="featured" name="is_featured" value="1" {{ old('is_featured', $course->is_featured) ? 'checked' : '' }}>
                 <label for="featured">Featured Course</label>
             </div>
+
+            @include('courses.partials.video-manager')
 
             <div class="form-actions">
                 <a href="{{ route('courses.index') }}" class="btn btn-cancel"><span>Cancel</span></a>

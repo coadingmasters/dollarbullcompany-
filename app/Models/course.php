@@ -20,4 +20,19 @@ class Course extends Model
         'duration_in_weeks',
         'is_featured',
     ];
+
+    public function enrollments()
+    {
+        return $this->hasMany(CourseEnrollment::class);
+    }
+
+    public function videos()
+    {
+        return $this->hasMany(CourseVideo::class)->orderBy('sort_order');
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 }

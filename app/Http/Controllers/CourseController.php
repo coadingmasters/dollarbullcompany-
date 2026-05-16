@@ -47,6 +47,8 @@ class CourseController extends Controller
 
     public function edit(Course $course)
     {
+        $course->load('videos');
+
         return view('courses.edit', compact('course'));
     }
 

@@ -3,6 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CourseEnrollmentController;
+use App\Http\Controllers\CourseCatalogController;
+use App\Http\Controllers\CourseLearnController;
+use App\Http\Controllers\StudentAuthController;
+use App\Http\Controllers\Admin\CourseVideoController;
 
 
 Route::get('/', function () {
@@ -75,9 +80,15 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::get('/enrollments', [EnrollmentController::class, 'adminIndex'])->name('enrollments.admin');
     Route::patch('/enrollments/{enrollment}/verify', [EnrollmentController::class, 'verify'])->name('enrollments.verify');
     Route::patch('/enrollments/{enrollment}/reject', [EnrollmentController::class, 'reject'])->name('enrollments.reject');
+
+    Route::get('/course-enrollments', [CourseEnrollmentController::class, 'adminIndex'])->name('course-enrollments.admin');
+    Route::patch('/course-enrollments/{courseEnrollment}/verify', [CourseEnrollmentController::class, 'verify'])->name('course-enrollments.verify');
+    Route::patch('/course-enrollments/{courseEnrollment}/reject', [CourseEnrollmentController::class, 'reject'])->name('course-enrollments.reject');
     
     // Course Management
     Route::resource('courses', CourseController::class);
+    Route::post('courses/{course}/videos', [CourseVideoController::class, 'store'])->name('courses.videos.store');
+    Route::delete('courses/{course}/videos/{video}', [CourseVideoController::class, 'destroy'])->name('courses.videos.destroy');
 });
 Route::get('/premium-group', function () {
     return view('frontend.premiumgroup');
@@ -87,11 +98,22 @@ Route::get('/enroll', [EnrollmentController::class, 'index'])->name('enrollment.
 Route::post('/enroll', [EnrollmentController::class, 'store'])->name('enrollment.store');
 Route::get('/enroll/success', [EnrollmentController::class, 'success'])->name('enrollment.success');
 
-// Frontend - Courses Listing
-Route::get('/courses', function () {
-    $courses = \App\Models\Course::where('status', 'published')->latest()->get();
-    return view('frontend.courses', compact('courses'));
-})->name('courses.frontend');
+// Frontend - Courses catalog, enrollment, student access
+Route::get('/courses', [CourseCatalogController::class, 'index'])->name('courses.frontend');
+Route::get('/courses/search', [CourseCatalogController::class, 'search'])->name('courses.search');
+
+Route::get('/courses/{course:slug}/enroll', [CourseEnrollmentController::class, 'showEnroll'])->name('courses.enroll.show');
+Route::post('/courses/{course:slug}/enroll', [CourseEnrollmentController::class, 'store'])->name('courses.enroll.store');
+Route::get('/courses/{course:slug}/enroll/success', [CourseEnrollmentController::class, 'successPage'])->name('courses.enroll.success');
+
+Route::middleware(['auth:student', 'verified.course'])->group(function () {
+    Route::get('/courses/{course:slug}/learn', [CourseLearnController::class, 'show'])->name('courses.learn');
+});
+
+Route::get('/student/login', [StudentAuthController::class, 'showLogin'])->name('student.login');
+Route::post('/student/login', [StudentAuthController::class, 'login'])->name('student.login.submit');
+Route::post('/student/logout', [StudentAuthController::class, 'logout'])->name('student.logout');
+Route::redirect('/student/register', '/courses', 301)->name('student.register');
 
 Route::get('/about',   fn() => view('about'))->name('about');
 Route::get('/contact', fn() => view('contact'))->name('contact');

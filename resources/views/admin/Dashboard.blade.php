@@ -544,6 +544,10 @@ body{background:var(--black);font-family:'Crimson Pro',Georgia,serif;color:var(-
             <span class="sb-item-text">Paid Courses</span>
             <span class="sb-badge">40</span>
         </a>
+        <a href="{{ route('course-enrollments.admin') }}" class="sb-item">
+            <svg class="sb-item-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <span class="sb-item-text">Course Students</span>
+        </a>
         <a href="{{ url('/admin/live-sessions') }}" class="sb-item">
             <svg class="sb-item-icon" viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="10" rx="1"/><path d="M17 9l5-2v10l-5-2V9z"/></svg>
             <span class="sb-item-text">Live Sessions</span>
