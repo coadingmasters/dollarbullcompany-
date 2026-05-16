@@ -9,13 +9,14 @@
     .ls-join-title { font-family: Cinzel, serif; font-size: clamp(1.2rem, 3vw, 1.8rem); color: #fff; margin-bottom: 20px; }
     .ls-join-title em { color: var(--gold); font-style: normal; }
     #video-container {
-        width: 100%; min-height: 500px; background: #0a0a0a; border: 1px solid var(--border);
-        display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
+        width: 100%; height: 520px; background: #0a0a0a; border: 1px solid var(--border);
+        position: relative; overflow: hidden;
+        display: flex; align-items: center; justify-content: center;
     }
     #video-container .ls-loading, #video-container .ls-msg {
         color: var(--muted); font-family: Cinzel, serif; font-size: .85rem; letter-spacing: .1em; text-transform: uppercase;
     }
-    #video-container video { width: 100%; height: 100%; min-height: 500px; object-fit: contain; background: #000; }
+    #video-container video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
     .ls-join-meta { margin-top: 24px; padding: 20px; background: var(--card); border: 1px solid var(--border); }
     .ls-join-meta h2 { font-family: Cinzel, serif; font-size: 1rem; color: #fff; margin-bottom: 8px; }
     .ls-join-meta p { color: var(--muted); line-height: 1.55; margin-bottom: 6px; font-size: .9rem; }
@@ -70,11 +71,8 @@
         if (videoPlaying) return;
         videoPlaying = true;
         container.innerHTML = '';
-        const player = document.createElement('div');
-        player.id = 'remote-player';
-        player.style.cssText = 'width:100%;height:100%;min-height:500px';
-        container.appendChild(player);
-        user.videoTrack.play('remote-player');
+        container.style.display = 'block'; // switch from flex to block so Agora fills 100% height
+        user.videoTrack.play(container);   // pass DOM element directly — more reliable than string ID
     }
 
     if (!appId || !token || !channelName) {
