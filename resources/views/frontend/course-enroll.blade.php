@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.frontend')
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Enroll — {{ $course->title }}</title>
+@section('title', 'Enroll — ' . $course->title)
+
+@push('styles')
   <style>
     :root {
       --gold: #C9A84C;
@@ -579,11 +577,11 @@
       color: var(--muted)
     }
   </style>
-</head>
+@endpush
 
-<body>
-
+@section('content')
   <div class="wrap">
+    <p style="margin-bottom:16px"><a href="{{ route('courses.frontend') }}" style="color:var(--gold-light);text-decoration:none;font-size:.85rem">← Back to all courses</a></p>
     <header class="hd">
       <div class="tag">📚 Course Enrollment</div>
       <h1>Enroll for <em>{{ $course->title }}</em></h1>
@@ -932,7 +930,9 @@
     </div>
   </div>
   <canvas id="faceCanvas" width="1280" height="720" style="display:none"></canvas>
+@endsection
 
+@push('scripts')
   <script>
     let faceStream = null;
 
@@ -1044,6 +1044,4 @@
       }
     });
   </script>
-</body>
-
-</html>
+@endpush
