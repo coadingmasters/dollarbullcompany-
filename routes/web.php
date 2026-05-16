@@ -8,6 +8,7 @@ use App\Http\Controllers\CourseCatalogController;
 use App\Http\Controllers\CourseLearnController;
 use App\Http\Controllers\StudentAuthController;
 use App\Http\Controllers\Admin\CourseVideoController;
+use App\Http\Controllers\Admin\CourseVideoHubController;
 
 
 Route::get('/', function () {
@@ -87,6 +88,9 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     
     // Course Management
     Route::resource('courses', CourseController::class);
+    Route::get('course-videos', [CourseVideoHubController::class, 'index'])->name('admin.course-videos.index');
+    Route::get('course-videos/{course}', [CourseVideoHubController::class, 'show'])->name('admin.course-videos.show');
+
     Route::post('courses/{course}/videos', [CourseVideoController::class, 'store'])->name('courses.videos.store');
     Route::delete('courses/{course}/videos/{video}', [CourseVideoController::class, 'destroy'])->name('courses.videos.destroy');
 });
@@ -117,4 +121,4 @@ Route::redirect('/student/register', '/courses', 301)->name('student.register');
 
 Route::get('/about',   fn() => view('about'))->name('about');
 Route::get('/contact', fn() => view('contact'))->name('contact');
-Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
+// Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');

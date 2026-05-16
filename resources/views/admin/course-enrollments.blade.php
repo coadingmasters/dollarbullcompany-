@@ -1,12 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Course Enrollments - Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
-    <style>
+﻿@extends('layouts.admin')
+
+@section('title', 'Course Students â€” Admin')
+@section('breadcrumb', 'Course Students')
+@section('page_eyebrow', 'Services')
+@section('page_title', 'Course Enrollments')
+
+@push('styles')
+<style>
         :root {
             --gold: #C9A84C;
             --gold-light: #E8C97A;
@@ -285,18 +285,10 @@
             border-radius: 4px;
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>📚 Course Enrollments</h1>
-            <a href="{{ route('admin.dashboard') }}">← Back to Dashboard</a>
-        </div>
 
-        @if(session('success'))
-            <div class="flash-msg">{{ session('success') }}</div>
-        @endif
+@endpush
 
+@section('content')
         @include('admin.partials.course-enrollment-filter')
 
         <div class="stats">
@@ -320,7 +312,7 @@
 
         @if($enrollments->isEmpty())
             <div class="empty-state">
-                <div style="font-size: 3rem; margin-bottom: 20px;">📭</div>
+                <div style="font-size: 3rem; margin-bottom: 20px;">ðŸ“­</div>
                 <h2>No enrollments yet</h2>
                 <p>Enrollments will appear here once users submit the form.</p>
             </div>
@@ -344,7 +336,7 @@
                         @foreach($enrollments as $enrollment)
                             <tr>
                                 <td>{{ $enrollment->first_name }} {{ $enrollment->last_name }}</td>
-                                <td>{{ $enrollment->course?->title ?? '—' }}</td>
+                                <td>{{ $enrollment->course?->title ?? 'â€”' }}</td>
                                 <td><a href="mailto:{{ $enrollment->email }}" style="color: var(--gold); text-decoration: none;">{{ $enrollment->email }}</a></td>
                                 <td>+{{ $enrollment->whatsapp_number }}</td>
                                 <td>{{ $enrollment->country }}</td>
@@ -376,7 +368,6 @@
                 </table>
             </div>
         @endif
-    </div>
 
     <!-- Modal for enrollment details -->
     <div class="modal" id="enrollmentModal">
@@ -389,6 +380,9 @@
         </div>
     </div>
 
+@endsection
+
+@push('scripts')
     <script>
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const adminBase = @json(rtrim(url('/admin'), '/'));
@@ -427,7 +421,7 @@
                 </div>
                 <div class="info-group">
                     <div class="info-label">Last Name</div>
-                    <div class="info-value">${enrollment.last_name || '—'}</div>
+                    <div class="info-value">${enrollment.last_name || 'â€”'}</div>
                 </div>
                 <div class="info-group full">
                     <div class="info-label">Email</div>
@@ -451,7 +445,7 @@
                 </div>
                 <div class="info-group full">
                     <div class="info-label">Course</div>
-                    <div class="info-value">${enrollment.course || '—'}</div>
+                    <div class="info-value">${enrollment.course || 'â€”'}</div>
                 </div>
                 <div class="info-group full">
                     <div class="info-label">Submitted</div>
@@ -515,5 +509,4 @@
             if (e.target === this) closeModal();
         });
     </script>
-</body>
-</html>
+@endpush

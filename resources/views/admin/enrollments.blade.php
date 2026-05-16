@@ -1,12 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Enrollments - Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
-    <style>
+@extends('layouts.admin')
+
+@section('title', 'Premium Group — Admin')
+@section('breadcrumb', 'Premium Group')
+@section('page_eyebrow', 'Services')
+@section('page_title', 'Premium Enrollments')
+
+@push('styles')
+<style>
         :root {
             --gold: #C9A84C;
             --gold-light: #E8C97A;
@@ -285,18 +285,9 @@
             border-radius: 4px;
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>👥 Enrollments</h1>
-            <a href="{{ route('admin.dashboard') }}">← Back to Dashboard</a>
-        </div>
+@endpush
 
-        @if(session('success'))
-            <div class="flash-msg">{{ session('success') }}</div>
-        @endif
-
+@section('content')
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-value">{{ $enrollments->count() }}</div>
@@ -372,7 +363,6 @@
                 </table>
             </div>
         @endif
-    </div>
 
     <!-- Modal for enrollment details -->
     <div class="modal" id="enrollmentModal">
@@ -385,6 +375,9 @@
         </div>
     </div>
 
+@endsection
+
+@push('scripts')
     <script>
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const adminBase = @json(rtrim(url('/admin'), '/'));
@@ -511,5 +504,4 @@
             if (e.target === this) closeModal();
         });
     </script>
-</body>
-</html>
+@endpush

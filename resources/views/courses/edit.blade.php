@@ -1,11 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Course</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
-    <style>
+@extends('layouts.admin')
+
+@section('title', 'Edit Course — Admin')
+@section('breadcrumb', 'Edit Course')
+@section('page_eyebrow', 'Paid Courses')
+@section('page_title', 'Edit Course')
+
+@section('page_actions')
+    <a href="{{ route('courses.index') }}" class="btn-sm btn-outline-gold">All courses</a>
+    <a href="{{ route('admin.course-videos.show', $course) }}" class="btn-sm btn-gold">Upload videos</a>
+@endsection
+
+@push('styles')
+<style>
         :root {
             --gold: #C9A84C;
             --gold-light: #E8C97A;
@@ -218,25 +224,9 @@
             font-style: italic;
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <a href="{{ route('courses.index') }}">← Back to Courses</a>
-            <h1>✏️ Edit Course</h1>
-        </div>
+@endpush
 
-        @if($errors->any())
-            <div class="errors">
-                <strong>Please fix the errors below:</strong>
-                <ul>
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
+@section('content')
         <form method="POST" action="{{ route('courses.update', $course) }}" enctype="multipart/form-data" class="form-card">
             @csrf
             @method('PUT')
@@ -306,13 +296,14 @@
                 <label for="featured">Featured Course</label>
             </div>
 
-            @include('courses.partials.video-manager')
-
             <div class="form-actions">
                 <a href="{{ route('courses.index') }}" class="btn btn-cancel"><span>Cancel</span></a>
                 <button type="submit" class="btn"><span>Update Course</span></button>
             </div>
         </form>
-    </div>
-</body>
-</html>
+
+        @include('courses.partials.video-manager')
+        <p style="margin-top:16px;font-size:.85rem;color:var(--wf)">
+            Tip: use <a href="{{ route('admin.course-videos.show', $course) }}" style="color:var(--gold)">Upload Videos</a> in the sidebar for a dedicated video manager.
+        </p>
+@endsection

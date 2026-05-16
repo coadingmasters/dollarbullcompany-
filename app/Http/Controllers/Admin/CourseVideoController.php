@@ -26,6 +26,12 @@ class CourseVideoController extends Controller
             'sort_order' => ($course->videos()->max('sort_order') ?? 0) + 1,
         ]);
 
+        if ($request->headers->get('referer') && str_contains($request->headers->get('referer'), 'course-videos')) {
+            return redirect()
+                ->route('admin.course-videos.show', $course)
+                ->with('success', 'Video uploaded successfully.');
+        }
+
         return back()->with('success', 'Video uploaded successfully.');
     }
 
