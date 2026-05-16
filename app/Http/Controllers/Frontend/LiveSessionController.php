@@ -6,15 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\LiveSession;
 use App\Models\LiveSessionEnrollment;
 use App\Services\AgoraTokenService;
-use Illuminate\Http\Request;
+use App\Support\LiveSessionIdentity;
 
 class LiveSessionController extends Controller
 {
     public function index()
     {
+        $userId = LiveSessionIdentity::currentUserId();
+
         $sessions = LiveSession::with('admin')->latest()->get();
 
-        $enrollments = LiveSessionEnrollment::where('user_id', auth()->id())
+        $enrollments = LiveSessionEnrollment::where('user_id', $userId)
             ->get()
             ->keyBy('live_session_id');
 
@@ -23,9 +25,11 @@ class LiveSessionController extends Controller
 
     public function show($id)
     {
+        $userId = LiveSessionIdentity::currentUserId();
+
         $session = LiveSession::with('admin')->findOrFail($id);
         $enrollment = LiveSessionEnrollment::where('live_session_id', $id)
-            ->where('user_id', auth()->id())
+            ->where('user_id', $userId)
             ->first();
 
         return view('frontend.live-sessions.show', compact('session', 'enrollment'));
@@ -33,10 +37,12 @@ class LiveSessionController extends Controller
 
     public function enroll($id)
     {
-        $session = LiveSession::findOrFail($id);
+        $userId = LiveSessionIdentity::currentUserId();
+
+        LiveSession::findOrFail($id);
 
         $alreadyEnrolled = LiveSessionEnrollment::where('live_session_id', $id)
-            ->where('user_id', auth()->id())
+            ->where('user_id', $userId)
             ->exists();
 
         if ($alreadyEnrolled) {
@@ -45,7 +51,7 @@ class LiveSessionController extends Controller
 
         LiveSessionEnrollment::create([
             'live_session_id' => $id,
-            'user_id' => auth()->id(),
+            'user_id' => $userId,
             'status' => 'pending',
             'enrolled_at' => now(),
         ]);
@@ -55,26 +61,26 @@ class LiveSessionController extends Controller
 
     public function join($id)
     {
+        $userId = LiveSessionIdentity::currentUserId();
+
         $session = LiveSession::findOrFail($id);
 
-        // Check session is live
-        if (!$session->isLive()) {
+        if (! $session->isLive()) {
             return back()->with('error', 'This session is not live yet');
         }
 
-        // Check enrollment exists and is approved
         $enrollment = LiveSessionEnrollment::where('live_session_id', $id)
-            ->where('user_id', auth()->id())
+            ->where('user_id', $userId)
             ->where('status', 'approved')
             ->first();
 
-        if (!$enrollment) {
+        if (! $enrollment) {
             return back()->with('error', 'You are not approved to join this session');
         }
 
         $appId = config('services.agora.app_id');
         $channelName = $session->agora_channel_name;
-        $uid = (int) auth()->id();
+        $uid = $userId;
         $token = app(AgoraTokenService::class)->generateToken(
             $channelName,
             $uid,

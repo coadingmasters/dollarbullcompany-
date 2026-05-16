@@ -132,6 +132,7 @@ Route::middleware(['auth:student', 'verified.course'])->group(function () {
     Route::get('/courses/{course:slug}/learn', [CourseLearnController::class, 'show'])->name('courses.learn');
 });
 
+Route::get('/login', fn () => redirect()->route('student.login', request()->only('redirect')))->name('login');
 Route::get('/student/login', [StudentAuthController::class, 'showLogin'])->name('student.login');
 Route::post('/student/login', [StudentAuthController::class, 'login'])->name('student.login.submit');
 Route::post('/student/logout', [StudentAuthController::class, 'logout'])->name('student.logout');
@@ -143,7 +144,7 @@ Route::get('/contact', fn() => view('contact'))->name('contact');
 
 
 // Frontend Live Session Routes
-Route::prefix('live-sessions')->middleware(['auth'])->name('live-sessions.')->group(function () {
+Route::prefix('live-sessions')->middleware(['auth:student'])->name('live-sessions.')->group(function () {
     Route::get('/', [FrontendLiveSessionController::class, 'index'])->name('index');
     Route::get('/{id}', [FrontendLiveSessionController::class, 'show'])->name('show');
     Route::post('/{id}/enroll', [FrontendLiveSessionController::class, 'enroll'])->name('enroll');
