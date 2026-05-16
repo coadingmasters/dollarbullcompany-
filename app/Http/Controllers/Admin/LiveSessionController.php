@@ -135,4 +135,34 @@ class LiveSessionController extends Controller
         return back()->with('success', 'Enrollment rejected');
     }
 
+    public function enrollmentsIndex()
+    {
+        $enrollments = LiveSessionEnrollment::with('liveSession')
+            ->latest()
+            ->get();
+
+        $total   = $enrollments->count();
+        $pending  = $enrollments->where('status', 'pending')->count();
+        $approved = $enrollments->where('status', 'approved')->count();
+        $rejected = $enrollments->where('status', 'rejected')->count();
+
+        return view('admin.live-session-enrollments', compact('enrollments', 'total', 'pending', 'approved', 'rejected'));
+    }
+
+    public function approveEnrollmentDirect($enrollmentId)
+    {
+        $enrollment = LiveSessionEnrollment::findOrFail($enrollmentId);
+        $enrollment->update(['status' => 'approved', 'approved_at' => now()]);
+
+        return back()->with('success', 'Enrollment approved successfully');
+    }
+
+    public function rejectEnrollmentDirect($enrollmentId)
+    {
+        $enrollment = LiveSessionEnrollment::findOrFail($enrollmentId);
+        $enrollment->update(['status' => 'rejected']);
+
+        return back()->with('success', 'Enrollment rejected');
+    }
+
 }

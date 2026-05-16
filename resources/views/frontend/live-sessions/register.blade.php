@@ -224,7 +224,7 @@
         <button type="submit" class="btn"><span>Submit Registration →</span></button>
       </form>
 
-      <p style="margin-top:16px;font-size:.82rem;color:var(--muted)">Already registered? <a href="{{ route('student.login') }}" style="color:var(--gold)">Log in here</a></p>
+      <p style="margin-top:16px;font-size:.82rem;color:var(--muted)">Already registered? <a href="{{ route('student.login', ['redirect' => route('live-sessions.index')]) }}" style="color:var(--gold)">Log in here</a></p>
     </div>
   </div>
 </div>

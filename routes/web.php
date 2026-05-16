@@ -96,6 +96,10 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::post('courses/{course}/videos', [CourseVideoController::class, 'store'])->name('courses.videos.store');
     Route::delete('courses/{course}/videos/{video}', [CourseVideoController::class, 'destroy'])->name('courses.videos.destroy');
 
+    Route::get('/live-session-enrollments', [AdminLiveSessionController::class, 'enrollmentsIndex'])->name('admin.live-session-enrollments.index');
+    Route::post('/live-session-enrollments/{enrollmentId}/approve', [AdminLiveSessionController::class, 'approveEnrollmentDirect'])->name('admin.live-session-enrollments.approve');
+    Route::post('/live-session-enrollments/{enrollmentId}/reject', [AdminLiveSessionController::class, 'rejectEnrollmentDirect'])->name('admin.live-session-enrollments.reject');
+
     Route::resource('live-sessions', AdminLiveSessionController::class)->parameters([
         'live-sessions' => 'id',
     ])->names([

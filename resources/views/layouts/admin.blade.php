@@ -559,9 +559,15 @@ body{background:var(--black);font-family:'Crimson Pro',Georgia,serif;color:var(-
             <svg class="sb-item-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
             <span class="sb-item-text">Course Students</span>
         </a>
-        <a href="{{ route('admin.live-sessions.index') }}" class="sb-item {{ request()->routeIs('admin.live-sessions.*') ? 'active' : '' }}">
+        <a href="{{ route('admin.live-sessions.index') }}" class="sb-item {{ request()->routeIs('admin.live-sessions.*') && !request()->routeIs('admin.live-session-enrollments.*') ? 'active' : '' }}">
             <svg class="sb-item-icon" viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="10" rx="1"/><path d="M17 9l5-2v10l-5-2V9z"/></svg>
             <span class="sb-item-text">Live Sessions</span>
+        </a>
+        <a href="{{ route('admin.live-session-enrollments.index') }}" class="sb-item {{ request()->routeIs('admin.live-session-enrollments.*') ? 'active' : '' }}">
+            <svg class="sb-item-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            <span class="sb-item-text">Session Students</span>
+            @php $pendingLs = \App\Models\LiveSessionEnrollment::where('status','pending')->count(); @endphp
+            @if($pendingLs > 0)<span class="sb-badge">{{ $pendingLs }}</span>@endif
         </a>
         <a href="{{ url('/admin/p2p') }}" class="sb-item">
             <svg class="sb-item-icon" viewBox="0 0 24 24"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3"/></svg>
