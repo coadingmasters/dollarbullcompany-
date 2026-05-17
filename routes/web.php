@@ -79,6 +79,14 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
         return redirect()->route('enrollments.admin');
     });
 
+    Route::get('/setup/storage-link', function () {
+        if (! file_exists(public_path('storage'))) {
+            Illuminate\Support\Facades\Artisan::call('storage:link');
+            return '<h2 style="font-family:sans-serif;color:green">✓ Storage link created! Images should now load. <a href="/admin/dashboard">Back to dashboard</a></h2>';
+        }
+        return '<h2 style="font-family:sans-serif;color:#555">Storage link already exists. <a href="/admin/dashboard">Back to dashboard</a></h2>';
+    })->name('admin.setup.storage-link');
+
     // Enrollments Management
     Route::get('/enrollments', [EnrollmentController::class, 'adminIndex'])->name('enrollments.admin');
     Route::patch('/enrollments/{enrollment}/verify', [EnrollmentController::class, 'verify'])->name('enrollments.verify');
