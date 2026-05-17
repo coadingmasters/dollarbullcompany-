@@ -44,11 +44,11 @@ class LiveSessionController extends Controller
         }
 
         if ($request->hasFile('face_photo')) {
-            $data['face_photo'] = $request->file('face_photo')->store('live_session_face_photos', 'public');
+            $data['face_photo'] = $request->file('face_photo')->store('images/enrollments/live-sessions/faces', 'public');
         }
 
         if ($request->hasFile('payment_screenshot')) {
-            $data['payment_screenshot'] = $request->file('payment_screenshot')->store('live_session_payment_screenshots', 'public');
+            $data['payment_screenshot'] = $request->file('payment_screenshot')->store('images/enrollments/live-sessions/payments', 'public');
         }
 
         $name = trim($data['first_name'] . ' ' . ($data['last_name'] ?? ''));

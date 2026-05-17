@@ -20,12 +20,12 @@ class EnrollmentController extends Controller
 
         if ($request->hasFile('payment_screenshot')) {
             $data['payment_screenshot'] = $request->file('payment_screenshot')
-                ->store('payment_screenshots', 'public');
+                ->store('images/enrollments/premium/payments', 'public');
         }
 
         if ($request->hasFile('face_photo')) {
             $data['face_photo'] = $request->file('face_photo')
-                ->store('face_photos', 'public');
+                ->store('images/enrollments/premium/faces', 'public');
         }
 
         Enrollment::create($data);

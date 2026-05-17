@@ -71,12 +71,12 @@ class CourseEnrollmentController extends Controller
 
         if ($request->hasFile('payment_screenshot')) {
             $data['payment_screenshot'] = $request->file('payment_screenshot')
-                ->store('course_payment_screenshots', 'public');
+                ->store('images/enrollments/courses/payments', 'public');
         }
 
         if ($request->hasFile('face_photo')) {
             $data['face_photo'] = $request->file('face_photo')
-                ->store('course_face_photos', 'public');
+                ->store('images/enrollments/courses/faces', 'public');
         }
 
         $name = trim($data['first_name'] . ' ' . ($data['last_name'] ?? ''));

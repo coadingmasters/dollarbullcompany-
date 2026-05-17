@@ -26,7 +26,7 @@ class CourseController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')->store('course_thumbnails', 'public');
+            $data['thumbnail'] = $request->file('thumbnail')->store('images/courses', 'public');
         } else {
             unset($data['thumbnail']);
         }
@@ -63,7 +63,7 @@ class CourseController extends Controller
                 Storage::disk('public')->delete($course->thumbnail);
             }
 
-            $data['thumbnail'] = $request->file('thumbnail')->store('course_thumbnails', 'public');
+            $data['thumbnail'] = $request->file('thumbnail')->store('images/courses', 'public');
         } else {
             unset($data['thumbnail']);
         }
