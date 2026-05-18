@@ -133,6 +133,22 @@
         .modal-end { flex: 1; padding: 11px; background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.45); color: #fca5a5; font-family: 'Cinzel', serif; font-size: .65rem; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
         .modal-end:hover { background: rgba(239,68,68,.25); }
 
+        /* Screen share button states */
+        .ctrl-btn.screen-active {
+            background: rgba(99,102,241,.18); border-color: rgba(99,102,241,.55); color: #a5b4fc;
+        }
+
+        /* Screen sharing overlay on the stage */
+        .screen-share-overlay {
+            position: absolute; inset: 0; background: rgba(6,6,6,.82);
+            display: none; align-items: center; justify-content: center;
+            flex-direction: column; gap: 10px; color: #a5b4fc; z-index: 5;
+            pointer-events: none;
+        }
+        .screen-share-overlay svg { width: 40px; height: 40px; opacity: .7; }
+        .screen-share-overlay span { font-family: 'Cinzel', serif; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; }
+        .screen-share-overlay.show { display: flex; }
+
         /* ── Error banner ── */
         .error-banner { display: none; position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 500; background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.4); color: #fca5a5; padding: 10px 20px; font-size: .82rem; font-family: 'Cinzel', serif; letter-spacing: .06em; white-space: nowrap; }
         .error-banner.show { display: block; }
@@ -171,6 +187,14 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="1" y1="1" x2="23" y2="23"/><path d="M21 21H3a2 2 0 01-2-2V8a2 2 0 012-2h3m3-3h6l2 3h1a2 2 0 012 2v9.34m-7.72-2.06A2 2 0 019 13.5V13"/></svg>
                 <span>Camera Off</span>
             </div>
+            <div class="screen-share-overlay" id="screenShareOverlay">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="2" y="3" width="20" height="14" rx="2"/>
+                    <path d="M8 21h8M12 17v4"/>
+                    <path d="M15 8l3 3-3 3M18 11H10"/>
+                </svg>
+                <span>Screen Sharing Active</span>
+            </div>
             <div class="conn-status connecting" id="connStatus">
                 <span class="conn-dot"></span>
                 <span id="connLabel">Connecting</span>
@@ -208,6 +232,10 @@
                     <span id="camStatus" style="font-size:.75rem;color:#86efac">On</span>
                 </div>
                 <div class="info-row">
+                    <span class="label">Screen</span>
+                    <span id="screenStatus" style="font-size:.75rem;color:var(--muted)">Off</span>
+                </div>
+                <div class="info-row">
                     <span class="label">Role</span>
                     <span style="font-size:.75rem;color:var(--gold-light)">Host</span>
                 </div>
@@ -237,6 +265,15 @@
                 <path d="M15 10l4.553-2.07A1 1 0 0121 8.845v6.31a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
             </svg>
             <span id="camLabel">Cam On</span>
+        </button>
+
+        <button class="ctrl-btn" id="screenBtn" onclick="toggleScreenShare()">
+            <svg id="screenIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2"/>
+                <path d="M8 21h8M12 17v4"/>
+                <path d="M15 8l3 3-3 3M18 11H10"/>
+            </svg>
+            <span id="screenLabel">Share Screen</span>
         </button>
 
         <div class="ctrl-divider"></div>
@@ -283,8 +320,10 @@
     let client        = null;
     let localAudio    = null;
     let localVideo    = null;
+    let screenTrack   = null;
     let micEnabled    = true;
     let camEnabled    = true;
+    let screenEnabled = false;
     let viewerCount   = 0;
     let timerSeconds  = 0;
     let timerInterval = null;
@@ -421,11 +460,29 @@
     window.toggleCamera = async function () {
         if (!localVideo) return;
         camEnabled = !camEnabled;
-        await localVideo.setEnabled(camEnabled);
-        const btn = document.getElementById('camBtn');
-        const lbl = document.getElementById('camLabel');
+
+        const btn     = document.getElementById('camBtn');
+        const lbl     = document.getElementById('camLabel');
         const overlay = document.getElementById('camOffOverlay');
-        const status = document.getElementById('camStatus');
+        const status  = document.getElementById('camStatus');
+
+        if (screenEnabled) {
+            // Screen share is active — just update the camera track state
+            // (camera is not currently published, so no Agora publish/unpublish needed)
+            await localVideo.setEnabled(camEnabled);
+            if (camEnabled) {
+                btn.className = 'ctrl-btn active';
+                lbl.textContent = 'Cam On';
+                status.textContent = 'On'; status.style.color = '#86efac';
+            } else {
+                btn.className = 'ctrl-btn cam-off-state';
+                lbl.textContent = 'Cam Off';
+                status.textContent = 'Off'; status.style.color = '#fca5a5';
+            }
+            return;
+        }
+
+        await localVideo.setEnabled(camEnabled);
         if (camEnabled) {
             btn.className = 'ctrl-btn active';
             lbl.textContent = 'Cam On';
@@ -439,6 +496,104 @@
         }
     };
 
+    // ── Screen Share ─────────────────────────────────────
+    window.toggleScreenShare = async function () {
+        if (!client || client.connectionState !== 'CONNECTED') {
+            showError('Please wait until you are connected before sharing your screen.');
+            return;
+        }
+        if (screenEnabled) {
+            await stopScreenShare();
+        } else {
+            await startScreenShare();
+        }
+    };
+
+    async function startScreenShare() {
+        try {
+            // Create screen track (disable screen audio to avoid echo)
+            screenTrack = await AgoraRTC.createScreenVideoTrack(
+                { encoderConfig: '1080p_1', optimizationMode: 'detail' },
+                'disable'
+            );
+
+            // When user clicks the browser's built-in "Stop sharing" button
+            screenTrack.on('track-ended', async function () {
+                await stopScreenShare();
+            });
+
+            // Swap: unpublish camera, publish screen
+            if (localVideo) {
+                await client.unpublish(localVideo);
+                localVideo.stop();
+            }
+            await client.publish(screenTrack);
+
+            // Show screen track in the stage
+            document.getElementById('camOffOverlay').classList.remove('show');
+            screenTrack.play('local-player');
+
+            screenEnabled = true;
+            updateScreenUI(true);
+
+        } catch (err) {
+            console.error('Screen share error:', err);
+            // Clean up if track was partially created
+            if (screenTrack) { try { screenTrack.close(); } catch(e){} screenTrack = null; }
+            if (err.name === 'NotAllowedError') {
+                showError('Screen sharing permission denied or cancelled.');
+            } else {
+                showError('Could not start screen share: ' + (err.message || err.name));
+            }
+        }
+    }
+
+    async function stopScreenShare() {
+        if (!screenTrack) return;
+
+        try {
+            await client.unpublish(screenTrack);
+            screenTrack.stop();
+            screenTrack.close();
+        } catch (e) { /* ignore */ }
+        screenTrack = null;
+        screenEnabled = false;
+
+        // Restore camera stream
+        if (localVideo) {
+            if (camEnabled) {
+                try {
+                    await client.publish(localVideo);
+                    localVideo.play('local-player');
+                    document.getElementById('camOffOverlay').classList.remove('show');
+                } catch (e) { console.error('Camera restore error:', e); }
+            } else {
+                document.getElementById('camOffOverlay').classList.add('show');
+            }
+        }
+
+        updateScreenUI(false);
+    }
+
+    function updateScreenUI(isSharing) {
+        const btn    = document.getElementById('screenBtn');
+        const lbl    = document.getElementById('screenLabel');
+        const status = document.getElementById('screenStatus');
+        const overlay = document.getElementById('screenShareOverlay');
+
+        if (isSharing) {
+            btn.className = 'ctrl-btn screen-active';
+            lbl.textContent = 'Stop Sharing';
+            status.textContent = 'Sharing'; status.style.color = '#a5b4fc';
+            overlay.classList.add('show');
+        } else {
+            btn.className = 'ctrl-btn';
+            lbl.textContent = 'Share Screen';
+            status.textContent = 'Off'; status.style.color = 'var(--muted)';
+            overlay.classList.remove('show');
+        }
+    }
+
     window.confirmEnd = function () {
         document.getElementById('endModal').classList.add('show');
     };
@@ -451,9 +606,10 @@
 
         // Cleanup Agora
         try {
-            if (localAudio) { localAudio.stop(); localAudio.close(); }
-            if (localVideo) { localVideo.stop(); localVideo.close(); }
-            if (client) { await client.unpublish(); await client.leave(); }
+            if (screenTrack) { screenTrack.stop(); screenTrack.close(); }
+            if (localAudio)  { localAudio.stop();  localAudio.close(); }
+            if (localVideo)  { localVideo.stop();  localVideo.close(); }
+            if (client)      { await client.unpublish(); await client.leave(); }
         } catch (e) { /* ignore cleanup errors */ }
 
         clearInterval(timerInterval);
