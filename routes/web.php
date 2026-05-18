@@ -9,6 +9,7 @@ use App\Http\Controllers\CourseLearnController;
 use App\Http\Controllers\StudentAuthController;
 use App\Http\Controllers\Admin\CourseVideoController;
 use App\Http\Controllers\Admin\CourseVideoHubController;
+use App\Http\Controllers\Admin\ChunkedVideoUploadController;
 use App\Http\Controllers\Admin\LiveSessionController as AdminLiveSessionController;
 use App\Http\Controllers\Frontend\LiveSessionController as FrontendLiveSessionController;
 
@@ -100,6 +101,11 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::resource('courses', CourseController::class);
     Route::get('course-videos', [CourseVideoHubController::class, 'index'])->name('admin.course-videos.index');
     Route::get('course-videos/{course}', [CourseVideoHubController::class, 'show'])->name('admin.course-videos.show');
+
+    // Chunked video upload (bypasses PHP file size limits)
+    Route::post('courses/{course}/videos/upload/init',     [ChunkedVideoUploadController::class, 'init'])->name('courses.videos.upload.init');
+    Route::post('courses/{course}/videos/upload/chunk',    [ChunkedVideoUploadController::class, 'chunk'])->name('courses.videos.upload.chunk');
+    Route::post('courses/{course}/videos/upload/finalize', [ChunkedVideoUploadController::class, 'finalize'])->name('courses.videos.upload.finalize');
 
     Route::post('courses/{course}/videos', [CourseVideoController::class, 'store'])->name('courses.videos.store');
     Route::delete('courses/{course}/videos/{video}', [CourseVideoController::class, 'destroy'])->name('courses.videos.destroy');
