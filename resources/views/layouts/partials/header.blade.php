@@ -69,6 +69,7 @@ body { background: var(--black); }
     gap: 10px;
     text-decoration: none;
     flex-shrink: 0;
+    min-width: 160px;
 }
 .logo-icon {
     display: flex;
@@ -99,7 +100,7 @@ body { background: var(--black); }
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     list-style: none;
     position: absolute;
     left: 50%;
@@ -110,9 +111,9 @@ body { background: var(--black); }
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 6px 18px;
+    padding: 6px 13px;
     font-family: 'Cinzel', serif;
-    font-size: 0.78rem;
+    font-size: 0.73rem;
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -334,6 +335,12 @@ body { background: var(--black); }
     .nav-links { display: none; }
     .cta-btn   { display: none; }
     .hamburger { display: flex; }
+    .logo-text { font-size: 1.1rem; }
+}
+@media (max-width: 480px) {
+    .logo-text { font-size: 0.92rem; letter-spacing: 0.02em; }
+    .logo-icon svg { width: 22px; height: 22px; }
+    .logo { gap: 7px; min-width: 0; }
 }
 @media (min-width: 901px) {
     .mobile-drawer  { display: none; }
@@ -360,12 +367,6 @@ body.drawer-open { overflow: hidden; }
         </a>
         <ul class="nav-links" role="list">
             <li>
-                <a href="{{ url('/') }}" class="nav-link {{ request()->is('/') ? 'active' : '' }}">
-                    <span>Home</span>
-                    <em class="nav-underline"></em>
-                </a>
-            </li>
-            <li>
                 <a href="{{ url('/about') }}" class="nav-link {{ request()->is('about') ? 'active' : '' }}">
                     <span>About Us</span>
                     <em class="nav-underline"></em>
@@ -374,6 +375,18 @@ body.drawer-open { overflow: hidden; }
             <li>
                 <a href="{{ url('/contact') }}" class="nav-link {{ request()->is('contact') ? 'active' : '' }}">
                     <span>Contact Us</span>
+                    <em class="nav-underline"></em>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url('/courses') }}" class="nav-link {{ request()->is('courses*') ? 'active' : '' }}">
+                    <span>Courses</span>
+                    <em class="nav-underline"></em>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url('/live-sessions') }}" class="nav-link {{ request()->is('live-sessions*') ? 'active' : '' }}">
+                    <span>Live Sessions</span>
                     <em class="nav-underline"></em>
                 </a>
             </li>
@@ -408,6 +421,16 @@ body.drawer-open { overflow: hidden; }
                     </a>
                 </li>
                 <li class="drawer-item" style="--i:3">
+                    <a href="{{ url('/courses') }}" class="drawer-link {{ request()->is('courses*') ? 'active' : '' }}">
+                        <span class="drawer-icon">◈</span> Courses
+                    </a>
+                </li>
+                <li class="drawer-item" style="--i:4">
+                    <a href="{{ url('/live-sessions') }}" class="drawer-link {{ request()->is('live-sessions*') ? 'active' : '' }}">
+                        <span class="drawer-icon">◈</span> Live Sessions
+                    </a>
+                </li>
+                <li class="drawer-item" style="--i:5">
                     <a href="{{ url('/contact') }}" class="drawer-cta-btn">
                         Get In Touch
                     </a>

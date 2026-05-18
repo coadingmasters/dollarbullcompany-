@@ -99,7 +99,9 @@ class LiveSessionController extends Controller
                 ->keyBy('live_session_id');
         }
 
-        return view('frontend.live-sessions.index', compact('sessions', 'enrollments'));
+        $firstActiveSession = $sessions->first(fn($s) => $s->status !== 'ended');
+
+        return view('frontend.live-sessions.index', compact('sessions', 'enrollments', 'firstActiveSession'));
     }
 
     public function show($id)

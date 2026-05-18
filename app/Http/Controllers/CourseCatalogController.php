@@ -9,8 +9,10 @@ class CourseCatalogController extends Controller
 {
     public function index()
     {
+        $firstCourse = Course::where('status', 'published')->latest()->first();
         return view('frontend.courses', [
-            'levels' => ['beginner', 'intermediate', 'advanced'],
+            'levels'      => ['beginner', 'intermediate', 'advanced'],
+            'firstCourse' => $firstCourse,
         ]);
     }
 

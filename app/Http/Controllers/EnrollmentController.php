@@ -10,7 +10,7 @@ class EnrollmentController extends Controller
 {
     public function index()
     {
-        return view('enrollments.index');
+        return view('frontend.premiumgroup');
     }
 
     public function store(EnrollmentRequest $request)
