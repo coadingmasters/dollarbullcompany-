@@ -364,13 +364,43 @@
     }
 
     // ── Agora ────────────────────────────────────────────
+    async function createTracks() {
+        const audioConfig = { echoCancellation: true, noiseSuppression: true };
+        const videoConfigs = [
+            { encoderConfig: { width: 1280, height: 720,  frameRate: 30, bitrateMax: 2000 } },
+            { encoderConfig: { width: 640,  height: 480,  frameRate: 24, bitrateMax: 1000 } },
+            { encoderConfig: { width: 320,  height: 240,  frameRate: 15, bitrateMax: 500  } },
+        ];
+
+        for (const [i, videoCfg] of videoConfigs.entries()) {
+            try {
+                if (i > 0) {
+                    const res = videoCfg.encoderConfig;
+                    showError('Camera timeout at HD — retrying at ' + res.width + '×' + res.height + '…');
+                    await new Promise(r => setTimeout(r, 600));
+                }
+                return await AgoraRTC.createMicrophoneAndCameraTracks(audioConfig, videoCfg);
+            } catch (err) {
+                const isTimeout = err.name === 'AbortError' || (err.message && err.message.toLowerCase().includes('timeout'));
+                const isUnexpected = err.code === 'UNEXPECTED_ERROR' || err.name === 'UNEXPECTED_ERROR';
+                if ((isTimeout || isUnexpected) && i < videoConfigs.length - 1) continue;
+                // Not a timeout or exhausted retries — re-throw
+                throw err;
+            }
+        }
+
+        // All video attempts failed — try mic only
+        showError('Camera unavailable — connecting with microphone only.');
+        const audio = await AgoraRTC.createMicrophoneAudioTrack(audioConfig);
+        return [audio, null];
+    }
+
     async function startBroadcast() {
         setConn('connecting', 'Connecting');
 
         try {
             client = AgoraRTC.createClient({ mode: 'live', codec: 'vp8' });
 
-            // Track viewer joins / leaves
             client.on('user-joined', function (user) {
                 viewerCount++;
                 updateViewerUI(viewerCount);
@@ -389,19 +419,26 @@
 
             await client.setClientRole('host');
 
-            // Create mic + camera tracks
-            [localAudio, localVideo] = await AgoraRTC.createMicrophoneAndCameraTracks(
-                { echoCancellation: true, noiseSuppression: true },
-                { encoderConfig: { width: 1280, height: 720, frameRate: 30, bitrateMax: 2000 } }
-            );
+            [localAudio, localVideo] = await createTracks();
 
-            // Play local preview
             hideOverlay();
-            localVideo.play('local-player');
 
-            // Join & publish
+            if (localVideo) {
+                localVideo.play('local-player');
+            } else {
+                // No camera — show cam-off overlay and update UI
+                document.getElementById('camOffOverlay').classList.add('show');
+                camEnabled = false;
+                document.getElementById('camBtn').className = 'ctrl-btn cam-off-state';
+                document.getElementById('camLabel').textContent = 'No Cam';
+                document.getElementById('camStatus').textContent = 'Unavailable';
+                document.getElementById('camStatus').style.color = '#fca5a5';
+            }
+
             await client.join(APP_ID, CHANNEL, TOKEN, UID);
-            await client.publish([localAudio, localVideo]);
+
+            const tracksToPublish = [localAudio, localVideo].filter(Boolean);
+            await client.publish(tracksToPublish);
 
             isConnected = true;
             setConn('connected', 'Live');
