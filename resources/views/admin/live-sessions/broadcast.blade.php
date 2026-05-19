@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Broadcast Studio — {{ $session->title }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:wght@300;400&display=swap" rel="stylesheet">
     <style>
@@ -152,6 +153,31 @@
         /* ── Error banner ── */
         .error-banner { display: none; position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 500; background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.4); color: #fca5a5; padding: 10px 20px; font-size: .82rem; font-family: 'Cinzel', serif; letter-spacing: .06em; white-space: nowrap; }
         .error-banner.show { display: block; }
+
+        /* ── Enrollment notifications ── */
+        .notif-stack { position: fixed; top: 60px; right: 292px; z-index: 400; display: flex; flex-direction: column; gap: 8px; max-height: calc(100vh - 160px); overflow-y: auto; overflow-x: visible; padding: 10px; width: 270px; pointer-events: none; }
+        .notif-card { background: rgba(10,10,10,.97); border: 1px solid rgba(212,160,23,.4); border-left: 3px solid var(--gold); padding: 12px 13px; pointer-events: all; animation: notifIn .28s ease forwards; }
+        .notif-card.out { animation: notifOut .25s ease forwards; }
+        @keyframes notifIn  { from { opacity:0; transform:translateX(18px); } to { opacity:1; transform:translateX(0); } }
+        @keyframes notifOut { from { opacity:1; transform:translateX(0); }    to { opacity:0; transform:translateX(18px); } }
+        .notif-hd { font-family: 'Cinzel', serif; font-size: .56rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
+        .notif-hd::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: pulse 1s ease-in-out infinite; flex-shrink: 0; }
+        .notif-name { font-size: .82rem; color: #fff; font-weight: 600; margin-bottom: 2px; }
+        .notif-meta { font-size: .72rem; color: var(--muted); margin-bottom: 9px; line-height: 1.4; }
+        .notif-actions { display: flex; gap: 7px; }
+        .notif-approve { flex: 1; padding: 6px 0; background: rgba(34,197,94,.14); border: 1px solid rgba(34,197,94,.4); color: #86efac; font-family: 'Cinzel', serif; font-size: .55rem; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; transition: background .2s; }
+        .notif-approve:hover { background: rgba(34,197,94,.25); }
+        .notif-reject  { flex: 1; padding: 6px 0; background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.35); color: #fca5a5; font-family: 'Cinzel', serif; font-size: .55rem; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; transition: background .2s; }
+        .notif-reject:hover  { background: rgba(239,68,68,.22); }
+
+        /* ── Pending list in side panel ── */
+        .pending-item { padding: 8px 0; border-bottom: 1px solid var(--border); }
+        .pending-item:last-child { border-bottom: none; }
+        .pending-name { font-size: .78rem; color: var(--text); margin-bottom: 2px; }
+        .pending-email { font-size: .7rem; color: var(--muted); margin-bottom: 6px; }
+        .pending-actions { display: flex; gap: 5px; }
+        .pa-approve { flex:1; padding:4px 0; background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.35); color:#86efac; font-family:'Cinzel',serif; font-size:.5rem; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; }
+        .pa-reject  { flex:1; padding:4px 0; background:rgba(239,68,68,.1);  border:1px solid rgba(239,68,68,.3);  color:#fca5a5; font-family:'Cinzel',serif; font-size:.5rem; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; }
     </style>
 </head>
 <body>
@@ -241,6 +267,28 @@
                 </div>
             </div>
 
+            {{-- Pending Enrollments --}}
+            <div class="panel-section" style="flex-shrink:0">
+                <div class="panel-label" style="display:flex;align-items:center;gap:6px">
+                    Pending
+                    <span id="pendingBadge" style="background:rgba(239,68,68,.22);border:1px solid rgba(239,68,68,.4);color:#fca5a5;padding:1px 7px;font-size:.58rem;border-radius:2px">{{ $pendingEnrollments->count() }}</span>
+                </div>
+                <div id="pendingList" style="max-height:180px;overflow-y:auto">
+                    @forelse($pendingEnrollments as $pe)
+                        <div class="pending-item" id="pitem-{{ $pe->id }}">
+                            <div class="pending-name">{{ trim(($pe->first_name ?? '') . ' ' . ($pe->last_name ?? '')) ?: 'Student' }}</div>
+                            <div class="pending-email">{{ $pe->email }}</div>
+                            <div class="pending-actions">
+                                <button class="pa-approve" onclick="enrollAction({{ $pe->id }},'approve',this)">Approve</button>
+                                <button class="pa-reject"  onclick="enrollAction({{ $pe->id }},'reject',this)">Reject</button>
+                            </div>
+                        </div>
+                    @empty
+                        <p id="pendingEmpty" style="font-size:.72rem;color:var(--muted);font-style:italic;padding:6px 0">No pending enrollments</p>
+                    @endforelse
+                </div>
+            </div>
+
             <div class="viewer-section">
                 <div class="panel-label">Live Viewers</div>
                 <div id="viewerList">
@@ -289,6 +337,9 @@
     </div>
 </div>
 
+{{-- Floating enrollment notifications --}}
+<div class="notif-stack" id="notifStack"></div>
+
 {{-- END CONFIRM MODAL --}}
 <div class="modal-bg" id="endModal">
     <div class="modal">
@@ -309,6 +360,7 @@
     @csrf
 </form>
 
+<script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
 <script>
 (function () {
@@ -665,6 +717,137 @@
 
     // ── Start on load ────────────────────────────────────
     startBroadcast();
+})();
+</script>
+
+<script>
+(function () {
+    const SESSION_ID   = @json($session->id);
+    const PUSHER_KEY   = @json(config('broadcasting.connections.pusher.key'));
+    const PUSHER_CLUST = @json(config('broadcasting.connections.pusher.options.cluster'));
+    const CSRF         = document.querySelector('meta[name="csrf-token"]').content;
+    const APPROVE_URL  = (id) => '/admin/live-session-enrollments/' + id + '/approve';
+    const REJECT_URL   = (id) => '/admin/live-session-enrollments/' + id + '/reject';
+
+    let pendingCount = parseInt(document.getElementById('pendingBadge').textContent, 10) || 0;
+
+    // ── Pusher connection ─────────────────────────────────
+    const pusher  = new Pusher(PUSHER_KEY, { cluster: PUSHER_CLUST, forceTLS: true });
+    const channel = pusher.subscribe('live-session-admin.' + SESSION_ID);
+
+    channel.bind('new-enrollment', function (data) {
+        addToPendingList(data);
+        showNotifCard(data);
+        pendingCount++;
+        updateBadge();
+    });
+
+    // ── Pending list helpers ──────────────────────────────
+    function addToPendingList(data) {
+        const empty = document.getElementById('pendingEmpty');
+        if (empty) empty.remove();
+
+        const list = document.getElementById('pendingList');
+        const div  = document.createElement('div');
+        div.className = 'pending-item';
+        div.id = 'pitem-' + data.enrollment_id;
+        div.innerHTML =
+            '<div class="pending-name">' + esc(data.name) + '</div>' +
+            '<div class="pending-email">' + esc(data.email) + (data.country ? ' · ' + esc(data.country) : '') + '</div>' +
+            '<div class="pending-actions">' +
+              '<button class="pa-approve" onclick="enrollAction(' + data.enrollment_id + ',\'approve\',this)">Approve</button>' +
+              '<button class="pa-reject"  onclick="enrollAction(' + data.enrollment_id + ',\'reject\',this)">Reject</button>' +
+            '</div>';
+        list.prepend(div);
+    }
+
+    // ── Floating notification card ────────────────────────
+    function showNotifCard(data) {
+        const stack = document.getElementById('notifStack');
+        const card  = document.createElement('div');
+        card.className = 'notif-card';
+        card.id = 'notif-' + data.enrollment_id;
+        card.innerHTML =
+            '<div class="notif-hd">New Enrollment</div>' +
+            '<div class="notif-name">' + esc(data.name) + '</div>' +
+            '<div class="notif-meta">' +
+              esc(data.email) +
+              (data.country ? '<br>' + esc(data.country) : '') +
+              (data.whatsapp ? ' · ' + esc(data.whatsapp) : '') +
+            '</div>' +
+            '<div class="notif-actions">' +
+              '<button class="notif-approve" onclick="enrollAction(' + data.enrollment_id + ',\'approve\',this)">✓ Approve</button>' +
+              '<button class="notif-reject"  onclick="enrollAction(' + data.enrollment_id + ',\'reject\',this)">✕ Reject</button>' +
+            '</div>';
+        stack.appendChild(card);
+
+        // Auto-dismiss after 60s if no action taken
+        setTimeout(() => dismissCard('notif-' + data.enrollment_id), 60000);
+    }
+
+    function dismissCard(id) {
+        const card = document.getElementById(id);
+        if (!card) return;
+        card.classList.add('out');
+        setTimeout(() => card && card.remove(), 280);
+    }
+
+    // ── Approve / Reject (called from both list and toast) ─
+    window.enrollAction = async function (enrollmentId, action, btn) {
+        btn.disabled = true;
+        btn.textContent = action === 'approve' ? 'Approving…' : 'Rejecting…';
+
+        const url = action === 'approve' ? APPROVE_URL(enrollmentId) : REJECT_URL(enrollmentId);
+
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+            });
+
+            if (!res.ok) throw new Error('Request failed');
+
+            // Remove from pending list
+            const pitem = document.getElementById('pitem-' + enrollmentId);
+            if (pitem) pitem.remove();
+            if (!document.querySelector('.pending-item')) {
+                document.getElementById('pendingList').innerHTML =
+                    '<p id="pendingEmpty" style="font-size:.72rem;color:var(--muted);font-style:italic;padding:6px 0">No pending enrollments</p>';
+            }
+
+            // Remove toast card
+            dismissCard('notif-' + enrollmentId);
+
+            // Update counts
+            pendingCount = Math.max(0, pendingCount - 1);
+            updateBadge();
+            if (action === 'approve') {
+                const approved = parseInt(document.getElementById('viewerCount').textContent, 10) || 0;
+                document.getElementById('viewerCount').textContent = approved + 1;
+                document.getElementById('sideViewerCount').textContent = (approved + 1) + ' approved';
+            }
+
+        } catch (e) {
+            btn.disabled = false;
+            btn.textContent = action === 'approve' ? 'Approve' : 'Reject';
+        }
+    };
+
+    function updateBadge() {
+        const badge = document.getElementById('pendingBadge');
+        badge.textContent = pendingCount;
+        badge.style.background = pendingCount > 0
+            ? 'rgba(239,68,68,.22)' : 'rgba(255,255,255,.06)';
+        badge.style.borderColor = pendingCount > 0
+            ? 'rgba(239,68,68,.4)' : 'rgba(255,255,255,.12)';
+        badge.style.color = pendingCount > 0 ? '#fca5a5' : 'var(--muted)';
+    }
+
+    function esc(str) {
+        const d = document.createElement('div');
+        d.textContent = String(str || '');
+        return d.innerHTML;
+    }
 })();
 </script>
 </body>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Events\NewLiveSessionEnrollment;
 use App\Models\LiveSession;
 use App\Models\LiveSessionEnrollment;
 use App\Models\Student;
@@ -62,7 +63,7 @@ class LiveSessionController extends Controller
 
         unset($data['password'], $data['password_confirmation']);
 
-        LiveSessionEnrollment::create([
+        $enrollment = LiveSessionEnrollment::create([
             'live_session_id'    => $session->id,
             'user_id'            => $userId,
             'status'             => 'pending',
@@ -76,6 +77,8 @@ class LiveSessionController extends Controller
             'face_photo'         => $data['face_photo'],
             'payment_screenshot' => $data['payment_screenshot'],
         ]);
+
+        event(new NewLiveSessionEnrollment($enrollment));
 
         return redirect()->route('live-sessions.register.success', $session->id)
             ->with('success', 'Registration submitted! Admin will review and contact you within 48 hours.');
@@ -133,12 +136,14 @@ class LiveSessionController extends Controller
             return back()->with('error', 'You are already enrolled in this session');
         }
 
-        LiveSessionEnrollment::create([
+        $enrollment = LiveSessionEnrollment::create([
             'live_session_id' => $id,
             'user_id' => $userId,
             'status' => 'pending',
             'enrolled_at' => now(),
         ]);
+
+        event(new NewLiveSessionEnrollment($enrollment));
 
         return back()->with('success', 'Enrolled successfully, please wait for admin approval');
     }

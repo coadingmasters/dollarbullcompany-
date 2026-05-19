@@ -132,8 +132,13 @@ class LiveSessionController extends Controller
             ->where('status', 'approved')
             ->count();
 
+        $pendingEnrollments = LiveSessionEnrollment::where('live_session_id', $id)
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+
         return view('admin.live-sessions.broadcast', compact(
-            'session', 'appId', 'channelName', 'token', 'uid', 'approvedCount'
+            'session', 'appId', 'channelName', 'token', 'uid', 'approvedCount', 'pendingEnrollments'
         ));
     }
 
@@ -189,6 +194,9 @@ class LiveSessionController extends Controller
         $enrollment = LiveSessionEnrollment::findOrFail($enrollmentId);
         $enrollment->update(['status' => 'approved', 'approved_at' => now()]);
 
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Enrollment approved']);
+        }
         return back()->with('success', 'Enrollment approved successfully');
     }
 
@@ -197,6 +205,9 @@ class LiveSessionController extends Controller
         $enrollment = LiveSessionEnrollment::findOrFail($enrollmentId);
         $enrollment->update(['status' => 'rejected']);
 
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Enrollment rejected']);
+        }
         return back()->with('success', 'Enrollment rejected');
     }
 
