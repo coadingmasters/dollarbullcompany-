@@ -10,6 +10,7 @@ use App\Http\Controllers\StudentAuthController;
 use App\Http\Controllers\Admin\CourseVideoController;
 use App\Http\Controllers\Admin\CourseVideoHubController;
 use App\Http\Controllers\Admin\ChunkedVideoUploadController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Admin\LiveSessionController as AdminLiveSessionController;
 use App\Http\Controllers\Frontend\LiveSessionController as FrontendLiveSessionController;
 
@@ -138,6 +139,8 @@ Route::get('/premium-group', function () {
 Route::get('/enroll', [EnrollmentController::class, 'index'])->name('enrollment.index');
 Route::post('/enroll', [EnrollmentController::class, 'store'])->name('enrollment.store');
 Route::get('/enroll/success', [EnrollmentController::class, 'success'])->name('enrollment.success');
+
+Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
 
 // Frontend - Courses catalog, enrollment, student access
 Route::get('/courses', [CourseCatalogController::class, 'index'])->name('courses.frontend');
