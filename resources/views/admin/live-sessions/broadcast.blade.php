@@ -324,6 +324,7 @@
     let micEnabled    = true;
     let camEnabled    = true;
     let screenEnabled = false;
+    let isConnected   = false;
     let viewerCount   = 0;
     let timerSeconds  = 0;
     let timerInterval = null;
@@ -402,6 +403,7 @@
             await client.join(APP_ID, CHANNEL, TOKEN, UID);
             await client.publish([localAudio, localVideo]);
 
+            isConnected = true;
             setConn('connected', 'Live');
             startTimer();
 
@@ -498,8 +500,8 @@
 
     // ── Screen Share ─────────────────────────────────────
     window.toggleScreenShare = async function () {
-        if (!client || client.connectionState !== 'CONNECTED') {
-            showError('Please wait until you are connected before sharing your screen.');
+        if (!isConnected || !client) {
+            showError('Please wait until the broadcast is live before sharing your screen.');
             return;
         }
         if (screenEnabled) {
