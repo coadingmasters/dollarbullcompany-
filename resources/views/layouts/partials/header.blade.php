@@ -390,6 +390,12 @@ body.drawer-open { overflow: hidden; }
                     <em class="nav-underline"></em>
                 </a>
             </li>
+            <li>
+                <a href="{{ route('blog.index') }}" class="nav-link {{ request()->is('blog*') ? 'active' : '' }}">
+                    <span>Blog</span>
+                    <em class="nav-underline"></em>
+                </a>
+            </li>
         </ul>
         <a href="{{ url('/contact') }}" class="cta-btn">
             <span class="cta-text">Contact Us</span>
@@ -431,6 +437,11 @@ body.drawer-open { overflow: hidden; }
                     </a>
                 </li>
                 <li class="drawer-item" style="--i:5">
+                    <a href="{{ route('blog.index') }}" class="drawer-link {{ request()->is('blog*') ? 'active' : '' }}">
+                        <span class="drawer-icon">◈</span> Blog
+                    </a>
+                </li>
+                <li class="drawer-item" style="--i:6">
                     <a href="{{ url('/contact') }}" class="drawer-cta-btn">
                         Get In Touch
                     </a>

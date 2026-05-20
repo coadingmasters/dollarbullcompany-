@@ -580,9 +580,13 @@ body{background:var(--black);font-family:'Crimson Pro',Georgia,serif;color:var(-
             <svg class="sb-item-icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 10l4-4 4 4M8 14l4 4 4-4"/></svg>
             <span class="sb-item-text">Hero Slider</span>
         </a>
-        <a href="{{ url('/admin/blog') }}" class="sb-item">
+        <a href="{{ route('admin.blogs.index') }}" class="sb-item {{ request()->routeIs('admin.blogs.*') ? 'active' : '' }}">
             <svg class="sb-item-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
             <span class="sb-item-text">Blog & News</span>
+        </a>
+        <a href="{{ route('admin.blogs.create') }}" class="sb-item {{ request()->routeIs('admin.blogs.create') ? 'active' : '' }}">
+            <svg class="sb-item-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span class="sb-item-text">New Post</span>
         </a>
         <a href="{{ url('/admin/signals') }}" class="sb-item">
             <svg class="sb-item-icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>

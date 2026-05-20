@@ -10,6 +10,8 @@ use App\Http\Controllers\StudentAuthController;
 use App\Http\Controllers\Admin\CourseVideoController;
 use App\Http\Controllers\Admin\CourseVideoHubController;
 use App\Http\Controllers\Admin\ChunkedVideoUploadController;
+use App\Http\Controllers\Admin\BlogController as AdminBlogController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Admin\LiveSessionController as AdminLiveSessionController;
 use App\Http\Controllers\Frontend\LiveSessionController as FrontendLiveSessionController;
@@ -131,6 +133,17 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::post('live-sessions/{id}/end', [AdminLiveSessionController::class, 'endSession'])->name('admin.live-sessions.end');
     Route::post('live-sessions/{id}/enrollments/{enrollmentId}/approve', [AdminLiveSessionController::class, 'approveEnrollment'])->name('admin.live-sessions.enrollments.approve');
     Route::post('live-sessions/{id}/enrollments/{enrollmentId}/reject', [AdminLiveSessionController::class, 'rejectEnrollment'])->name('admin.live-sessions.enrollments.reject');
+
+    // Blog Management
+    Route::resource('blogs', AdminBlogController::class)->names([
+        'index'   => 'admin.blogs.index',
+        'create'  => 'admin.blogs.create',
+        'store'   => 'admin.blogs.store',
+        'show'    => 'admin.blogs.show',
+        'edit'    => 'admin.blogs.edit',
+        'update'  => 'admin.blogs.update',
+        'destroy' => 'admin.blogs.destroy',
+    ]);
 });
 Route::get('/premium-group', function () {
     return view('frontend.premiumgroup');
@@ -163,6 +176,10 @@ Route::redirect('/student/register', '/courses', 301)->name('student.register');
 Route::get('/about', fn() => view('about'))->name('about');
 Route::get('/contact', fn() => view('contact'))->name('contact');
 // Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
+
+// Public Blog
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{blog:slug}', [BlogController::class, 'show'])->name('blog.show');
 
 
 // Frontend Live Session Routes — public (no auth required)
