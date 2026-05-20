@@ -107,23 +107,25 @@
 @push('scripts')
 <script>
 (function () {
-    // ── Constants ──────────────────────────────────────────────
-    const CHUNK_SIZE  = 1 * 1024 * 1024;   // 1 MB — safely under PHP's 2 MB limit
-    const INIT_URL    = @json($initUrl);
-    const CHUNK_URL   = @json($chunkUrl);
-    const FINAL_URL   = @json($finalizeUrl);
-    // CSRF: try meta tag first, then any hidden _token input on the page
-    const CSRF = document.querySelector('meta[name="csrf-token"]')?.content
-              || document.querySelector('input[name="_token"]')?.value || '';
+    // ── Config ────────────────────────────────────────────────
+    const CHUNK_SIZE   = 2 * 1024 * 1024;  // 2 MB per chunk
+    const CONCURRENCY  = 3;                 // parallel chunk uploads
+    const MAX_RETRIES  = 4;                 // retries per chunk (with backoff)
+    const RETRY_BASE   = 800;               // ms base delay, doubles each retry
 
-    // ── State ──────────────────────────────────────────────────
-    let selFile   = null;
-    let uploading = false;
-    let aborted   = false;
-    let startedAt = 0;
-    let bytesDone = 0;
+    const INIT_URL  = @json($initUrl);
+    const CHUNK_URL = @json($chunkUrl);
+    const FINAL_URL = @json($finalizeUrl);
+    const CSRF      = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
-    // ── File selection ─────────────────────────────────────────
+    // ── State ─────────────────────────────────────────────────
+    let selFile        = null;
+    let uploading      = false;
+    let aborted        = false;
+    let startedAt      = 0;
+    let completedBytes = 0;
+
+    // ── DOM ───────────────────────────────────────────────────
     const fileInput = document.getElementById('vFileInput');
     const dropZone  = document.getElementById('dropZone');
 
@@ -131,7 +133,7 @@
         if (fileInput.files?.[0]) pick(fileInput.files[0]);
     });
     dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.style.borderColor = 'var(--gold)'; });
-    dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = 'rgba(212,160,23,.3)'; });
+    dropZone.addEventListener('dragleave', ()  => { dropZone.style.borderColor = 'rgba(212,160,23,.3)'; });
     dropZone.addEventListener('drop', e => {
         e.preventDefault();
         dropZone.style.borderColor = 'rgba(212,160,23,.3)';
@@ -141,14 +143,14 @@
 
     function pick(file) {
         selFile = file;
-        document.getElementById('dzEmpty').style.display = 'none';
+        document.getElementById('dzEmpty').style.display    = 'none';
         document.getElementById('dzSelected').style.display = 'block';
-        document.getElementById('dzFileName').textContent = file.name;
-        document.getElementById('dzFileSize').textContent = fmtBytes(file.size);
+        document.getElementById('dzFileName').textContent   = file.name;
+        document.getElementById('dzFileSize').textContent   = fmtBytes(file.size);
         hideError(); hideSuccess();
     }
 
-    // ── Upload entry point (called by onclick) ─────────────────
+    // ── Upload entry point ────────────────────────────────────
     window.vcStartUpload = async function () {
         if (uploading) return;
 
@@ -160,14 +162,14 @@
 
         const ext = selFile.name.split('.').pop().toLowerCase();
         if (!['mp4','webm','mov','avi','mkv'].includes(ext)) {
-            showError('Unsupported file type. Please use MP4, WebM, MOV, AVI or MKV.');
+            showError('Unsupported format. Please use MP4, WebM, MOV, AVI or MKV.');
             return;
         }
 
-        uploading = true;
-        aborted   = false;
-        bytesDone = 0;
-        startedAt = Date.now();
+        uploading      = true;
+        aborted        = false;
+        completedBytes = 0;
+        startedAt      = Date.now();
 
         setBusy(true);
         hideError();
@@ -177,55 +179,33 @@
         const totalChunks = Math.ceil(selFile.size / CHUNK_SIZE);
 
         try {
-            // ── 1. Init ────────────────────────────────────────
-            const initRes = await api(INIT_URL, 'POST',
-                JSON.stringify({ total_chunks: totalChunks }),
-                { 'Content-Type': 'application/json' }
-            );
-            if (!initRes.ok) throw new Error('Could not start upload session. Please try again.');
+            // ── Step 1: Init session ───────────────────────────
+            const initRes = await apiJSON(INIT_URL, { total_chunks: totalChunks });
+            if (!initRes.ok) {
+                const body = await initRes.json().catch(() => ({}));
+                throw new Error(body.message || body.error || 'Could not start upload session (HTTP ' + initRes.status + '). Please try again.');
+            }
             const { upload_id } = await initRes.json();
 
-            // ── 2. Upload chunks ───────────────────────────────
-            for (let i = 0; i < totalChunks; i++) {
-                if (aborted) throw new Error('__CANCELLED__');
-
-                const start = i * CHUNK_SIZE;
-                const end   = Math.min(start + CHUNK_SIZE, selFile.size);
-                const blob  = selFile.slice(start, end);
-
-                const fd = new FormData();
-                fd.append('upload_id',    upload_id);
-                fd.append('chunk_index',  i);
-                fd.append('total_chunks', totalChunks);
-                fd.append('chunk',        blob, 'chunk');
-
-                const res = await api(CHUNK_URL, 'POST', fd, {});
-                if (!res.ok) {
-                    const err = await res.json().catch(() => ({}));
-                    throw new Error(err.error || 'Failed on chunk ' + i + '. Please retry.');
-                }
-
-                bytesDone = end;
-                const elapsed = Math.max((Date.now() - startedAt) / 1000, 0.01);
-                const speed   = bytesDone / elapsed;
-                const eta     = (selFile.size - bytesDone) / speed;
-                // 90% of bar for chunks, last 10% for finalize
-                const pct = Math.round((bytesDone / selFile.size) * 90);
-                showProgress(pct, 'Uploading… (' + (i + 1) + ' / ' + totalChunks + ' chunks)', speed, eta);
-            }
+            // ── Step 2: Upload all chunks in parallel ──────────
+            await uploadAllChunks(upload_id, totalChunks);
 
             if (aborted) throw new Error('__CANCELLED__');
 
-            // ── 3. Finalize ────────────────────────────────────
-            showProgress(93, 'Assembling video on server…');
+            // ── Step 3: Finalize ───────────────────────────────
+            showProgress(92, 'Assembling video on server…');
 
-            const finalRes = await api(FINAL_URL, 'POST',
-                JSON.stringify({ upload_id, title, description: desc, total_chunks: totalChunks, file_name: selFile.name }),
-                { 'Content-Type': 'application/json' }
-            );
+            const finalRes = await apiJSON(FINAL_URL, {
+                upload_id,
+                title,
+                description:  desc,
+                total_chunks: totalChunks,
+                file_name:    selFile.name,
+            });
+
             if (!finalRes.ok) {
-                const err = await finalRes.json().catch(() => ({}));
-                throw new Error(err.message || err.error || 'Finalization failed. Please try again.');
+                const body = await finalRes.json().catch(() => ({}));
+                throw new Error(body.message || body.error || 'Finalization failed (HTTP ' + finalRes.status + '). Please try again.');
             }
 
             const result = await finalRes.json();
@@ -238,7 +218,7 @@
                 appendToList(title);
                 resetForm();
                 uploading = false;
-            }, 900);
+            }, 800);
 
         } catch (err) {
             uploading = false;
@@ -257,49 +237,152 @@
         hideProgress();
     };
 
-    // ── Helpers ────────────────────────────────────────────────
-    function api(url, method, body, extraHeaders) {
+    // ── Parallel chunk uploader ───────────────────────────────
+    async function uploadAllChunks(uploadId, totalChunks) {
+        const queue          = Array.from({ length: totalChunks }, (_, i) => i);
+        const chunkBytes     = new Array(totalChunks).fill(0); // bytes per chunk index
+        let   nextChunkIndex = 0;
+        let   workerError    = null;
+
+        // Pre-compute each chunk's byte size for accurate progress
+        for (let i = 0; i < totalChunks; i++) {
+            const start     = i * CHUNK_SIZE;
+            chunkBytes[i]   = Math.min(CHUNK_SIZE, selFile.size - start);
+        }
+
+        function getNext() {
+            if (aborted || workerError) return null;
+            if (nextChunkIndex >= totalChunks) return null;
+            return nextChunkIndex++;
+        }
+
+        async function worker() {
+            while (true) {
+                const i = getNext();
+                if (i === null) break;
+                try {
+                    await uploadOneChunkWithRetry(uploadId, i, totalChunks);
+                    completedBytes += chunkBytes[i];
+                    const elapsed = Math.max((Date.now() - startedAt) / 1000, 0.01);
+                    const speed   = completedBytes / elapsed;
+                    const eta     = (selFile.size - completedBytes) / Math.max(speed, 1);
+                    const pct     = Math.min(90, Math.round((completedBytes / selFile.size) * 90));
+                    const done    = Math.round((completedBytes / selFile.size) * totalChunks);
+                    showProgress(pct, 'Uploading… (' + done + ' / ' + totalChunks + ' chunks)', speed, eta);
+                } catch (e) {
+                    workerError = e;
+                    break;
+                }
+            }
+        }
+
+        // Start N workers concurrently
+        const workers = Array.from({ length: Math.min(CONCURRENCY, totalChunks) }, worker);
+        await Promise.all(workers);
+
+        if (aborted) throw new Error('__CANCELLED__');
+        if (workerError) throw workerError;
+    }
+
+    // Upload one chunk, retrying on transient errors
+    async function uploadOneChunkWithRetry(uploadId, index, totalChunks) {
+        const start = index * CHUNK_SIZE;
+        const end   = Math.min(start + CHUNK_SIZE, selFile.size);
+        const blob  = selFile.slice(start, end);
+
+        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+            if (aborted) throw new Error('__CANCELLED__');
+
+            const fd = new FormData();
+            fd.append('upload_id',   uploadId);
+            fd.append('chunk_index', index);
+            fd.append('chunk',       blob, 'chunk');
+
+            try {
+                const res = await fetch(CHUNK_URL, {
+                    method:  'POST',
+                    headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+                    body:    fd,
+                });
+
+                if (res.ok) return; // success
+
+                const body   = await res.json().catch(() => ({}));
+                const errMsg = body.error || ('Chunk ' + index + ' rejected by server (HTTP ' + res.status + ').');
+
+                // 4xx = client/session error — no point retrying
+                if (res.status >= 400 && res.status < 500) {
+                    throw new Error(errMsg + ' Please refresh the page and try again.');
+                }
+
+                // 5xx = server error — fall through to retry
+                if (attempt === MAX_RETRIES) throw new Error(errMsg);
+
+            } catch (fetchErr) {
+                if (fetchErr.message === '__CANCELLED__') throw fetchErr;
+                if (attempt === MAX_RETRIES) {
+                    throw new Error('Chunk ' + index + ' failed after ' + MAX_RETRIES + ' retries: ' + fetchErr.message);
+                }
+            }
+
+            // Exponential back-off: 800ms, 1.6s, 3.2s, 6.4s
+            await sleep(RETRY_BASE * Math.pow(2, attempt));
+        }
+    }
+
+    // ── Fetch helpers ─────────────────────────────────────────
+    function apiJSON(url, data) {
         return fetch(url, {
-            method,
-            headers: Object.assign({ 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' }, extraHeaders),
-            body,
+            method:  'POST',
+            headers: {
+                'Content-Type':  'application/json',
+                'X-CSRF-TOKEN':  CSRF,
+                'Accept':        'application/json',
+            },
+            body: JSON.stringify(data),
         });
     }
 
+    function sleep(ms) {
+        return new Promise(r => setTimeout(r, ms));
+    }
+
+    // ── UI helpers ────────────────────────────────────────────
     function setBusy(on) {
         const btn    = document.getElementById('uploadBtn');
         const cancel = document.getElementById('cancelBtn');
         const dz     = document.getElementById('dropZone');
         btn.disabled = on;
         document.getElementById('uploadBtnTxt').textContent = on ? 'Uploading…' : 'Upload Video';
-        cancel.style.display = on ? 'inline-block' : 'none';
-        dz.style.pointerEvents = on ? 'none' : 'auto';
-        dz.style.opacity = on ? '.6' : '1';
+        cancel.style.display      = on ? 'inline-block' : 'none';
+        dz.style.pointerEvents    = on ? 'none' : 'auto';
+        dz.style.opacity          = on ? '.5' : '1';
         document.getElementById('vFileInput').disabled = on;
-        document.getElementById('vTitle').disabled = on;
-        document.getElementById('vDesc').disabled  = on;
+        document.getElementById('vTitle').disabled     = on;
+        document.getElementById('vDesc').disabled      = on;
     }
 
     function showProgress(pct, status, speed, eta) {
-        document.getElementById('progressWrap').style.display = 'block';
-        document.getElementById('pBar').style.width  = pct + '%';
-        document.getElementById('pPct').textContent  = pct + '%';
-        document.getElementById('pStatus').textContent = status;
-        document.getElementById('pSpeed').textContent  = (speed && speed > 0) ? fmtBytes(speed) + '/s' : '';
-        document.getElementById('pEta').textContent   = (eta && eta > 0 && isFinite(eta)) ? 'ETA ' + fmtTime(eta) : '';
+        document.getElementById('progressWrap').style.display  = 'block';
+        document.getElementById('pBar').style.width            = pct + '%';
+        document.getElementById('pPct').textContent            = pct + '%';
+        document.getElementById('pStatus').textContent         = status;
+        document.getElementById('pSpeed').textContent          = (speed > 0) ? fmtBytes(speed) + '/s' : '';
+        document.getElementById('pEta').textContent            = (eta > 0 && isFinite(eta)) ? 'ETA ' + fmtTime(eta) : '';
     }
     function hideProgress() { document.getElementById('progressWrap').style.display = 'none'; }
 
     function showError(msg) {
         const el = document.getElementById('vError');
-        el.textContent = '⚠ ' + msg;
+        el.innerHTML  = '⚠ ' + esc(msg);
         el.style.display = 'block';
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-    function hideError()   { document.getElementById('vError').style.display = 'none'; }
+    function hideError()   { document.getElementById('vError').style.display   = 'none'; }
 
     function showSuccess(msg) {
         const el = document.getElementById('vSuccess');
-        el.textContent = '✓ ' + msg;
+        el.textContent   = '✓ ' + msg;
         el.style.display = 'block';
     }
     function hideSuccess() { document.getElementById('vSuccess').style.display = 'none'; }
@@ -310,8 +393,8 @@
 
         let list = document.getElementById('videoItems');
         if (!list) {
-            list = document.createElement('ul');
-            list.id = 'videoItems';
+            list          = document.createElement('ul');
+            list.id       = 'videoItems';
             list.style.cssText = 'list-style:none;margin-bottom:20px';
             document.getElementById('uploadPanel').before(list);
         }
@@ -325,19 +408,19 @@
 
     function resetForm() {
         selFile = null;
-        document.getElementById('vTitle').value  = '';
-        document.getElementById('vDesc').value   = '';
-        document.getElementById('vFileInput').value = '';
-        document.getElementById('dzEmpty').style.display    = 'block';
-        document.getElementById('dzSelected').style.display = 'none';
+        document.getElementById('vTitle').value              = '';
+        document.getElementById('vDesc').value               = '';
+        document.getElementById('vFileInput').value          = '';
+        document.getElementById('dzEmpty').style.display     = 'block';
+        document.getElementById('dzSelected').style.display  = 'none';
         dropZone.style.borderColor = 'rgba(212,160,23,.3)';
-        dropZone.style.opacity = '1';
+        dropZone.style.opacity     = '1';
     }
 
     function fmtBytes(b) {
         if (b >= 1073741824) return (b / 1073741824).toFixed(1) + ' GB';
-        if (b >= 1048576)    return (b / 1048576).toFixed(1) + ' MB';
-        if (b >= 1024)       return (b / 1024).toFixed(0) + ' KB';
+        if (b >= 1048576)    return (b / 1048576).toFixed(1)    + ' MB';
+        if (b >= 1024)       return (b / 1024).toFixed(0)       + ' KB';
         return b + ' B';
     }
     function fmtTime(s) {

@@ -46,7 +46,17 @@
             </aside>
             <main class="player">
                 <h2 id="lessonTitle">{{ $course->videos->first()->title }}</h2>
-                <video id="lessonPlayer" controls playsinline src="{{ $course->videos->first()->video_url }}"></video>
+                <video id="lessonPlayer" controls playsinline
+                       src="{{ $course->videos->first()->video_url }}"
+                       onerror="document.getElementById('videoError').style.display='block'">
+                </video>
+                <div id="videoError" style="display:none;margin-top:10px;padding:12px 16px;
+                     background:rgba(192,57,43,.12);border:1px solid rgba(192,57,43,.35);
+                     color:#e07b73;font-size:.85rem;line-height:1.5">
+                    ⚠ This video could not be loaded. The file may still be processing, or
+                    there may be a server configuration issue. Please try refreshing the page,
+                    or contact support if the problem persists.
+                </div>
             </main>
         </div>
     @endif
@@ -60,10 +70,12 @@
             document.querySelectorAll('.lesson').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById('lessonTitle').textContent = btn.dataset.title;
+            document.getElementById('videoError').style.display = 'none';
             const v = document.getElementById('lessonPlayer');
+            v.pause();
             v.src = btn.dataset.src;
             v.load();
-            v.play();
+            v.play().catch(() => {}); // suppress autoplay policy errors
         });
     });
 </script>

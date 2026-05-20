@@ -32,6 +32,9 @@ class CourseVideo extends Model
 
     public function getVideoUrlAttribute(): string
     {
-        return Storage::disk('public')->url($this->video_path);
+        // Use url() helper — it picks up the actual request scheme (http/https)
+        // and real domain, so it works on live HTTPS sites without mixed-content errors.
+        // Storage::disk('public')->url() uses APP_URL which can be wrong on live servers.
+        return url('storage/' . $this->video_path);
     }
 }

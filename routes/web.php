@@ -108,6 +108,7 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     // Chunked video upload (bypasses PHP file size limits)
     Route::post('courses/{course}/videos/upload/init',     [ChunkedVideoUploadController::class, 'init'])->name('courses.videos.upload.init');
     Route::post('courses/{course}/videos/upload/chunk',    [ChunkedVideoUploadController::class, 'chunk'])->name('courses.videos.upload.chunk');
+    Route::get('courses/{course}/videos/upload/status',    [ChunkedVideoUploadController::class, 'status'])->name('courses.videos.upload.status');
     Route::post('courses/{course}/videos/upload/finalize', [ChunkedVideoUploadController::class, 'finalize'])->name('courses.videos.upload.finalize');
 
     Route::post('courses/{course}/videos', [CourseVideoController::class, 'store'])->name('courses.videos.store');
