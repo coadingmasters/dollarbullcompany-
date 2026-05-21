@@ -69,41 +69,46 @@
     const loadingEl   = document.getElementById('videoLoading');
     const audioUnblock = document.getElementById('audio-unblock');
 
-    let videoPlaying  = false;
-    const audioTracks = []; // track all subscribed audio tracks
+    const audioTracks = []; // all subscribed audio tracks
 
     function showStatus(text) {
-        if (loadingEl) loadingEl.textContent = text;
+        if (loadingEl) { loadingEl.style.display = 'block'; loadingEl.textContent = text; }
     }
 
     function showMessage(text) {
-        videoPlaying = false;
+        // Clear any Agora video elements then show message
+        clearVideoElements();
         container.innerHTML = '<p class="ls-msg">' + text + '</p>';
     }
 
+    // Remove all Agora-injected video/div elements from container
+    // but keep the loading text and audio-unblock overlay
+    function clearVideoElements() {
+        Array.from(container.children).forEach(function (el) {
+            if (el !== loadingEl && el !== audioUnblock) el.remove();
+        });
+    }
+
+    // Always clears old video first — safe to call on every new track
     function renderVideo(user) {
-        if (videoPlaying) return;
-        videoPlaying = true;
+        clearVideoElements();
         if (loadingEl) loadingEl.style.display = 'none';
-        container.style.display = 'block';
         user.videoTrack.play(container);
     }
 
     function playAudio(track) {
-        audioTracks.push(track);
+        // Avoid duplicate subscriptions
+        if (audioTracks.indexOf(track) === -1) audioTracks.push(track);
         track.play().catch(function () {
-            // Browser blocked autoplay — show tap-to-enable overlay
             audioUnblock.classList.add('show');
         });
     }
 
-    // When user taps the overlay, resume all audio tracks
     audioUnblock.addEventListener('click', function () {
         audioUnblock.classList.remove('show');
         audioTracks.forEach(function (t) { try { t.play(); } catch(e){} });
     });
 
-    // Agora global autoplay-failed handler
     AgoraRTC.onAutoplayFailed = function () {
         audioUnblock.classList.add('show');
     };
@@ -115,7 +120,7 @@
 
     const client = AgoraRTC.createClient({ mode: 'live', codec: 'vp8' });
 
-    // Register listeners BEFORE joining
+    // user-published fires for BOTH initial stream AND when host switches camera↔screen
     client.on('user-published', async function (user, mediaType) {
         try {
             await client.subscribe(user, mediaType);
@@ -128,8 +133,9 @@
 
     client.on('user-unpublished', function (user, mediaType) {
         if (mediaType === 'video') {
-            videoPlaying = false;
-            showStatus('Host paused the video...');
+            // Clear the old video — new one will arrive immediately via user-published
+            clearVideoElements();
+            showStatus('Switching stream...');
         }
     });
 
@@ -141,7 +147,8 @@
         if (curState === 'DISCONNECTED') showMessage('Disconnected from session');
     });
 
-    async function subscribeToUser(user) {
+    // Subscribe to a user who was already broadcasting when we joined
+    async function subscribeToExistingUser(user) {
         try {
             if (user.hasVideo) {
                 await client.subscribe(user, 'video');
@@ -152,7 +159,7 @@
                 playAudio(user.audioTrack);
             }
         } catch (e) {
-            console.error('Manual subscribe error:', e);
+            console.error('Subscribe error:', e);
         }
     }
 
@@ -161,13 +168,14 @@
             await client.setClientRole('audience', { level: 1 });
             await client.join(appId, channelName, token, uid);
 
+            // If host is already broadcasting (camera OR screen share), subscribe immediately
             if (client.remoteUsers && client.remoteUsers.length > 0) {
                 for (const user of client.remoteUsers) {
-                    await subscribeToUser(user);
+                    await subscribeToExistingUser(user);
                 }
             }
 
-            if (!videoPlaying) {
+            if (!container.querySelector('video')) {
                 showStatus('Connected — waiting for host to stream...');
             }
         } catch (err) {

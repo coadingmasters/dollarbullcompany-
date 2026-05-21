@@ -489,10 +489,11 @@
 
             await client.join(APP_ID, CHANNEL, TOKEN, UID);
 
+            isConnected = true; // mark connected right after join — before publish
+
             const tracksToPublish = [localAudio, localVideo].filter(Boolean);
             await client.publish(tracksToPublish);
 
-            isConnected = true;
             setConn('connected', 'Live');
             startTimer();
 
@@ -589,7 +590,8 @@
 
     // ── Screen Share ─────────────────────────────────────
     window.toggleScreenShare = async function () {
-        if (!isConnected || !client) {
+        // Use Agora's actual connection state — not a manual flag that can get out of sync
+        if (!client || client.connectionState !== 'CONNECTED') {
             showError('Please wait until the broadcast is live before sharing your screen.');
             return;
         }
