@@ -12,6 +12,20 @@
         <p style="color:#7dcea0;margin-bottom:14px">✓ {{ session('success') }}</p>
     @endif
 
+    {{-- ── Delete confirmation modal ── --}}
+    <div id="delModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);align-items:center;justify-content:center">
+        <div style="background:#1a1a1a;border:1px solid rgba(192,57,43,.5);padding:28px 32px;max-width:380px;width:90%;text-align:center">
+            <div style="font-size:2rem;margin-bottom:12px">🗑️</div>
+            <p style="font-family:Cinzel,serif;font-size:.8rem;letter-spacing:.1em;color:#e07b73;margin-bottom:8px;text-transform:uppercase">Delete Video</p>
+            <p id="delModalTitle" style="color:var(--wd);font-size:.9rem;margin-bottom:20px"></p>
+            <p style="color:var(--wf);font-size:.8rem;margin-bottom:24px">This action cannot be undone.</p>
+            <div style="display:flex;gap:10px;justify-content:center">
+                <button onclick="closeDelModal()" style="padding:9px 22px;background:rgba(255,255,255,.06);border:1px solid var(--bb);color:var(--wd);cursor:pointer;font-family:Cinzel,serif;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase">Cancel</button>
+                <button id="delConfirmBtn" style="padding:9px 22px;background:rgba(192,57,43,.2);border:1px solid rgba(192,57,43,.5);color:#e07b73;cursor:pointer;font-family:Cinzel,serif;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+
     {{-- ── Existing videos list ── --}}
     <div id="videoListWrap">
         @if($course->videos->isNotEmpty())
@@ -19,9 +33,13 @@
                 @foreach($course->videos as $video)
                     <li style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);gap:12px">
                         <span style="color:var(--wd)">{{ $loop->iteration }}. {{ $video->title }}</span>
-                        <form method="POST" action="{{ route('courses.videos.destroy', [$course, $video]) }}" onsubmit="return confirm('Remove this video?')">
+                        <form method="POST" action="{{ route('courses.videos.destroy', [$course, $video]) }}" class="del-form">
                             @csrf @method('DELETE')
-                            <button type="submit" style="background:rgba(192,57,43,.15);border:1px solid rgba(192,57,43,.4);color:#e07b73;padding:5px 12px;cursor:pointer;font-size:.75rem">Remove</button>
+                            <button type="button"
+                                    onclick="openDelModal(this, '{{ addslashes($video->title) }}')"
+                                    style="background:rgba(192,57,43,.15);border:1px solid rgba(192,57,43,.4);color:#e07b73;padding:5px 12px;cursor:pointer;font-size:.75rem">
+                                Delete
+                            </button>
                         </form>
                     </li>
                 @endforeach
@@ -30,6 +48,27 @@
             <p id="noVideos" class="help-text" style="margin-bottom:14px">No videos yet.</p>
         @endif
     </div>
+
+    <script>
+    let _delForm = null;
+    function openDelModal(btn, title) {
+        _delForm = btn.closest('form');
+        document.getElementById('delModalTitle').textContent = '"' + title + '"';
+        const modal = document.getElementById('delModal');
+        modal.style.display = 'flex';
+        document.getElementById('delConfirmBtn').onclick = function () {
+            _delForm.submit();
+        };
+    }
+    function closeDelModal() {
+        document.getElementById('delModal').style.display = 'none';
+        _delForm = null;
+    }
+    // Close on backdrop click
+    document.getElementById('delModal').addEventListener('click', function(e) {
+        if (e.target === this) closeDelModal();
+    });
+    </script>
 
     {{-- ── Upload panel ── --}}
     <div style="background:rgba(201,168,76,.04);border:1px solid var(--border);padding:20px" id="uploadPanel">

@@ -46,16 +46,14 @@
             </aside>
             <main class="player">
                 <h2 id="lessonTitle">{{ $course->videos->first()->title }}</h2>
-                <video id="lessonPlayer" controls playsinline
+                <video id="lessonPlayer" controls playsinline preload="metadata"
                        src="{{ $course->videos->first()->video_url }}"
                        onerror="document.getElementById('videoError').style.display='block'">
                 </video>
                 <div id="videoError" style="display:none;margin-top:10px;padding:12px 16px;
                      background:rgba(192,57,43,.12);border:1px solid rgba(192,57,43,.35);
                      color:#e07b73;font-size:.85rem;line-height:1.5">
-                    ⚠ This video could not be loaded. The file may still be processing, or
-                    there may be a server configuration issue. Please try refreshing the page,
-                    or contact support if the problem persists.
+                    ⚠ This video could not be loaded. Please try refreshing the page.
                 </div>
             </main>
         </div>
@@ -65,17 +63,27 @@
 
 @push('scripts')
 <script>
+    const player = document.getElementById('lessonPlayer');
+
+    // Ensure full volume on load — browser may default to 0 on some configs
+    player.volume = 1;
+    player.muted  = false;
+
     document.querySelectorAll('.lesson').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.lesson').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById('lessonTitle').textContent = btn.dataset.title;
             document.getElementById('videoError').style.display = 'none';
-            const v = document.getElementById('lessonPlayer');
-            v.pause();
-            v.src = btn.dataset.src;
-            v.load();
-            v.play().catch(() => {}); // suppress autoplay policy errors
+
+            player.pause();
+            player.src    = btn.dataset.src;
+            player.volume = 1;     // restore volume each time
+            player.muted  = false; // never muted
+            player.load();
+            player.play().catch(() => {
+                // Autoplay blocked — user can click the play button manually, sound will work
+            });
         });
     });
 </script>
