@@ -137,7 +137,7 @@ class ChunkedVideoUploadController extends Controller
         }
 
         // Assemble chunks → final video file
-        $finalRelPath = 'images/videos/' . Str::uuid() . '.' . $ext;
+        $finalRelPath = 'videos/' . Str::uuid() . '.' . $ext;
         $finalAbsPath = Storage::disk('public')->path($finalRelPath);
 
         $destDir = dirname($finalAbsPath);
@@ -148,7 +148,7 @@ class ChunkedVideoUploadController extends Controller
         $out = @fopen($finalAbsPath, 'wb');
         if (! $out) {
             return response()->json([
-                'error' => 'Cannot write video file. Check that storage/app/public/images/videos is writable.',
+                'error' => 'Cannot write video file. Check that storage/app/public/videos is writable.',
             ], 500);
         }
 

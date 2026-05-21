@@ -32,7 +32,7 @@ class CourseVideoController extends Controller
             ]);
         }
 
-        $path = $file->store('images/videos', 'public');
+        $path = $file->store('videos', 'public');
 
         if (! $path) {
             throw ValidationException::withMessages([
