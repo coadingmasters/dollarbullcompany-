@@ -31,6 +31,24 @@
     #audio-unblock.show { display: flex; }
     #audio-unblock span { font-family: Cinzel, serif; font-size: .85rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-light); }
     #audio-unblock svg { width: 40px; height: 40px; stroke: var(--gold); fill: none; stroke-width: 1.5; }
+
+    /* ── Live Chat ── */
+    .ls-chat-wrap { margin-top: 20px; background: var(--card); border: 1px solid var(--border); }
+    .ls-chat-header { padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+    .ls-chat-header span { font-family: Cinzel, serif; font-size: .62rem; letter-spacing: .15em; text-transform: uppercase; color: var(--gold); }
+    .ls-chat-messages { height: 220px; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+    .ls-chat-empty { color: var(--muted); font-size: .8rem; font-style: italic; text-align: center; padding: 20px 0; }
+    .ls-chat-meta { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px; }
+    .ls-chat-name { font-size: .72rem; color: var(--gold-light); font-weight: 600; }
+    .ls-chat-name.is-self { color: #86efac; }
+    .ls-chat-time { font-size: .65rem; color: var(--muted); }
+    .ls-chat-text { font-size: .83rem; color: var(--text); line-height: 1.45; word-break: break-word; }
+    .ls-chat-form { display: flex; border-top: 1px solid var(--border); }
+    .ls-chat-input { flex: 1; background: transparent; border: none; padding: 11px 14px; color: var(--text); font-size: .85rem; outline: none; font-family: inherit; }
+    .ls-chat-input::placeholder { color: var(--muted); }
+    .ls-chat-send { background: rgba(201,168,76,.15); border: none; border-left: 1px solid var(--border); padding: 11px 18px; color: var(--gold-light); font-family: Cinzel, serif; font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; transition: background .2s; white-space: nowrap; }
+    .ls-chat-send:hover { background: rgba(201,168,76,.28); }
+    .ls-chat-send:disabled { opacity: .45; cursor: default; }
 </style>
 @endpush
 
@@ -53,6 +71,21 @@
     </div>
 
     <a href="{{ route('live-sessions.index') }}" class="ls-leave">Leave Session</a>
+
+    {{-- Live Chat Panel --}}
+    <div class="ls-chat-wrap">
+        <div class="ls-chat-header">
+            <svg style="width:13px;height:13px;stroke:var(--gold);fill:none;stroke-width:2;flex-shrink:0" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            <span>Live Chat</span>
+        </div>
+        <div class="ls-chat-messages" id="chatMessages">
+            <p class="ls-chat-empty" id="chatEmpty">Send a message to the host...</p>
+        </div>
+        <form class="ls-chat-form" id="chatForm">
+            <input type="text" id="chatInput" class="ls-chat-input" placeholder="Type a message..." maxlength="500" autocomplete="off">
+            <button type="submit" class="ls-chat-send" id="chatSendBtn">Send</button>
+        </form>
+    </div>
 </div>
 
 <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
@@ -185,6 +218,81 @@
     }
 
     joinSession();
+})();
+</script>
+
+{{-- Live Chat JS --}}
+<script>
+(function () {
+    const COMMENT_URL   = @json($commentUrl);
+    const STUDENT_NAME  = @json($studentName);
+    const CSRF          = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+    const form      = document.getElementById('chatForm');
+    const input     = document.getElementById('chatInput');
+    const sendBtn   = document.getElementById('chatSendBtn');
+    const msgBox    = document.getElementById('chatMessages');
+
+    function esc(str) {
+        const d = document.createElement('div');
+        d.textContent = String(str || '');
+        return d.innerHTML;
+    }
+
+    function nowTime() {
+        const d = new Date();
+        return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+    }
+
+    function appendMessage(name, text, isSelf) {
+        const empty = document.getElementById('chatEmpty');
+        if (empty) empty.remove();
+
+        const el = document.createElement('div');
+        el.className = 'ls-chat-msg';
+        el.innerHTML =
+            '<div class="ls-chat-meta">' +
+                '<span class="ls-chat-name' + (isSelf ? ' is-self' : '') + '">' + esc(name) + '</span>' +
+                '<span class="ls-chat-time">' + nowTime() + '</span>' +
+            '</div>' +
+            '<div class="ls-chat-text">' + esc(text) + '</div>';
+        msgBox.appendChild(el);
+        msgBox.scrollTop = msgBox.scrollHeight;
+    }
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const msg = input.value.trim();
+        if (!msg) return;
+
+        input.value = '';
+        sendBtn.disabled = true;
+        appendMessage(STUDENT_NAME, msg, true);
+
+        try {
+            await fetch(COMMENT_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': CSRF,
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ message: msg }),
+            });
+        } catch (err) {
+            console.error('Chat send error:', err);
+        } finally {
+            sendBtn.disabled = false;
+            input.focus();
+        }
+    });
+
+    // Allow Enter key (already default for submit, but handle Shift+Enter to prevent send)
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            // default submit happens — nothing extra needed
+        }
+    });
 })();
 </script>
 @endpush

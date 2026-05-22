@@ -182,12 +182,17 @@ class LiveSessionController extends Controller
                 ->with('error', 'Live session is temporarily unavailable. Please contact support.');
         }
 
+        $studentName = auth('student')->user()?->name ?? 'Viewer';
+        $commentUrl  = route('live-sessions.comment', $id);
+
         return view('frontend.live-sessions.join', compact(
             'session',
             'appId',
             'channelName',
             'token',
-            'uid'
+            'uid',
+            'studentName',
+            'commentUrl'
         ));
     }
 }

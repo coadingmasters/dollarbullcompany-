@@ -15,6 +15,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Admin\LiveSessionController as AdminLiveSessionController;
 use App\Http\Controllers\Frontend\LiveSessionController as FrontendLiveSessionController;
+use App\Http\Controllers\Frontend\LiveSessionCommentController;
 use App\Http\Controllers\P2pController;
 
 
@@ -211,4 +212,5 @@ Route::prefix('live-sessions')->middleware(['auth:student'])->name('live-session
     Route::get('/{id}/join', [FrontendLiveSessionController::class, 'join'])
         ->middleware('enrollment.approved')
         ->name('join');
+    Route::post('/{id}/comment', [LiveSessionCommentController::class, 'store'])->name('comment');
 });
