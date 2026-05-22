@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Blog') — CryptoOnly</title>
+    <title>@yield('title', 'Blog') — Dollar Bull University</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -94,8 +95,8 @@
 <header class="site-header">
     <div class="header-inner">
         <a href="{{ url('/') }}" class="site-logo">
-            <div class="logo-dot">C</div>
-            <span class="logo-name">Crypto<span>Only</span></span>
+            <div class="logo-dot">$</div>
+            <span class="logo-name">Dollar Bull <span>University</span></span>
         </a>
 
         <nav class="desktop-nav">

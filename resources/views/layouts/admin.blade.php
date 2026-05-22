@@ -3,9 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Admin â€” CryptoOnly')</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <title>@yield('title', 'Admin — Dollar Bull University')</title>
+    <meta name=”csrf-token” content=”{{ csrf_token() }}”>
+    <link rel=”icon” type=”image/svg+xml” href=”/favicon.svg”>
+    <link rel=”preconnect” href=”https://fonts.googleapis.com”>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600&display=swap" rel="stylesheet">
 <style>
@@ -520,7 +521,7 @@ body{background:var(--black);font-family:'Crimson Pro',Georgia,serif;color:var(-
             </svg>
         </span>
         <span class="sb-logo-text">
-            <span class="sb-logo-c">Crypto</span><span class="sb-logo-o">Only</span>
+            <span class="sb-logo-c">Dollar Bull </span><span class="sb-logo-o">University</span>
         </span>
     </a>
 

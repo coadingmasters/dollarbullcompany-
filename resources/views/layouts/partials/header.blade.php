@@ -448,7 +448,7 @@ body.drawer-open { overflow: hidden; }
                 </li>
             </ul>
             <div class="drawer-footer">
-                <span class="logo-crypto">Crypto</span><span class="logo-only">Only</span>
+                <span class="logo-crypto">Dollar</span><span class="logo-only">bull university</span>
             </div>
         </div>
     </div>
