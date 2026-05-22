@@ -15,6 +15,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Admin\LiveSessionController as AdminLiveSessionController;
 use App\Http\Controllers\Frontend\LiveSessionController as FrontendLiveSessionController;
+use App\Http\Controllers\P2pController;
 
 
 Route::get('/', function () {
@@ -82,6 +83,13 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::get('/premium-group', function () {
         return redirect()->route('enrollments.admin');
     });
+
+    // P2P admin
+    Route::get('/p2p',                         [P2pController::class, 'adminIndex'])->name('admin.p2p.index');
+    Route::get('/p2p/{p2p}',                   [P2pController::class, 'adminShow'])->name('admin.p2p.show');
+    Route::patch('/p2p/{p2p}/verify',          [P2pController::class, 'verify'])->name('admin.p2p.verify');
+    Route::patch('/p2p/{p2p}/reject',          [P2pController::class, 'reject'])->name('admin.p2p.reject');
+    Route::delete('/p2p/{p2p}',                [P2pController::class, 'destroy'])->name('admin.p2p.destroy');
 
     Route::get('/setup/storage-link', function () {
         if (! file_exists(public_path('storage'))) {
@@ -153,6 +161,11 @@ Route::get('/premium-group', function () {
 Route::get('/enroll', [EnrollmentController::class, 'index'])->name('enrollment.index');
 Route::post('/enroll', [EnrollmentController::class, 'store'])->name('enrollment.store');
 Route::get('/enroll/success', [EnrollmentController::class, 'success'])->name('enrollment.success');
+
+// P2P frontend
+Route::get('/p2p',         [P2pController::class, 'index'])->name('p2p.index');
+Route::post('/p2p',        [P2pController::class, 'store'])->name('p2p.store');
+Route::get('/p2p/success', [P2pController::class, 'success'])->name('p2p.success');
 
 Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
 

@@ -570,7 +570,7 @@ body{background:var(--black);font-family:'Crimson Pro',Georgia,serif;color:var(-
             @php $pendingLs = \App\Models\LiveSessionEnrollment::where('status','pending')->count(); @endphp
             @if($pendingLs > 0)<span class="sb-badge">{{ $pendingLs }}</span>@endif
         </a>
-        <a href="{{ url('/admin/p2p') }}" class="sb-item">
+        <a href="{{ route('admin.p2p.index') }}" class="sb-item {{ request()->routeIs('admin.p2p.*') ? 'active' : '' }}">
             <svg class="sb-item-icon" viewBox="0 0 24 24"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3"/></svg>
             <span class="sb-item-text">P2P Trading</span>
         </a>
