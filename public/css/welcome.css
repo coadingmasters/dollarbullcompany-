@@ -767,6 +767,107 @@
 }
 
 
+/* ══════════════════════════════════════════════════════════
+   WHITE CARDS OVERRIDE
+   All animations, transitions & hover effects unchanged.
+   Only colors flipped to white/light scheme.
+══════════════════════════════════════════════════════════ */
+
+/* Section background — soft off-white so white cards pop */
+.services-section {
+    background: #f4f3ef;
+}
+.services-section::before {
+    background: radial-gradient(circle, rgba(212,160,23,0.10) 0%, transparent 70%);
+}
+.services-section::after {
+    background: radial-gradient(circle, rgba(212,160,23,0.07) 0%, transparent 70%);
+}
+
+/* Section header text on light bg */
+.section-title  { color: #111111; }
+.section-desc   { color: #666666; }
+.section-eyebrow { color: #B8860B; }
+
+/* ── White card base ── */
+.service-card {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.07);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+.service-card:hover {
+    border-color: rgba(212,160,23,0.6);
+    box-shadow:
+        0 24px 56px rgba(0,0,0,0.14),
+        0  0  32px rgba(212,160,23,0.18),
+        inset 0 1px 0 rgba(212,160,23,0.2);
+}
+
+/* Image stays the same — no changes needed */
+
+/* Number badge on image */
+.card-number {
+    background: rgba(255,255,255,0.88);
+    border: 1px solid rgba(180,140,11,0.45);
+    color: #8a6800;
+    backdrop-filter: blur(6px);
+}
+
+/* Icon badge */
+.card-icon-badge {
+    background: rgba(255,255,255,0.88);
+    border: 1px solid rgba(212,160,23,0.45);
+    backdrop-filter: blur(8px);
+}
+.card-icon-badge svg { stroke: #B8860B; }
+.service-card:hover .card-icon-badge { background: #D4A017; border-color: #D4A017; }
+.service-card:hover .card-icon-badge svg { stroke: #ffffff; }
+
+/* Shimmer — softer on white */
+.card-shimmer::after {
+    background: linear-gradient(90deg, transparent, rgba(212,160,23,0.12), transparent);
+}
+
+/* Card body */
+.card-body { background: #ffffff; }
+
+/* Gold divider line on hover — keep gold */
+.card-body::before {
+    background: linear-gradient(90deg, transparent, #D4A017, transparent);
+}
+
+/* Tag */
+.card-tag { color: #9a6f00; opacity: 1; }
+
+/* Title */
+.card-title { color: #111111; }
+.service-card:hover .card-title { color: #8a5e00; }
+
+/* Description */
+.card-desc { color: #555555; }
+
+/* CTA button */
+.card-btn {
+    border: 1px solid rgba(180,140,11,0.5);
+    background: rgba(212,160,23,0.06);
+    color: #7a5800;
+}
+.card-btn:hover { color: #ffffff; border-color: #B8860B; }
+.card-btn .btn-fill {
+    background: linear-gradient(135deg, #9a6f00, #D4A017);
+}
+
+/* Stats strip */
+.card-stats { border-top: 1px solid rgba(0,0,0,0.08); }
+.card-stat  { border-right: 1px solid rgba(0,0,0,0.08); }
+.card-stat:last-child { border-right: none; }
+.cs-val { color: #9a6f00; }
+.cs-lbl { color: #888888; }
+
+/* ══════════════════════════════════════════════════════════
+   END WHITE CARDS OVERRIDE
+══════════════════════════════════════════════════════════ */
+
 .about-section {
     position: relative;
     padding: 100px 40px;
