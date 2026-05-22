@@ -577,7 +577,7 @@ body{background:var(--black);font-family:'Crimson Pro',Georgia,serif;color:var(-
 
         <div class="sb-label">Content</div>
 
-        <a href="{{ url('/admin/slider') }}" class="sb-item">
+        <a href="{{ route('admin.sliders.index') }}" class="sb-item {{ request()->routeIs('admin.sliders.*') ? 'active' : '' }}">
             <svg class="sb-item-icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 10l4-4 4 4M8 14l4 4 4-4"/></svg>
             <span class="sb-item-text">Hero Slider</span>
         </a>

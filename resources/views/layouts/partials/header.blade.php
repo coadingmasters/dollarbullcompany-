@@ -353,16 +353,15 @@ body.drawer-open { overflow: hidden; }
     <div class="header-topline"></div>
 
     <nav class="header-nav container">
-        <a href="{{ url('/') }}" class="logo" aria-label="CryptoOnly Home">
+        <a href="{{ url('/') }}" class="logo" aria-label="Dollar Bull University Home">
             <span class="logo-icon">
-                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <polygon points="14,2 26,8 26,20 14,26 2,20 2,8" stroke="#D4A017" stroke-width="1.5" fill="none"/>
-                    <polygon points="14,6 22,10 22,18 14,22 6,18 6,10" fill="#D4A017" opacity="0.15"/>
-                    <text x="14" y="18" text-anchor="middle" font-family="serif" font-size="11" fill="#D4A017" font-weight="bold">$</text>
-                </svg>
+                <img src="{{ asset('storage/img/IMG-20260416-WA0036.jpeg') }}"
+                     alt="Dollar Bull University"
+                     style="width:52px;height:52px;border-radius:50%;object-fit:cover;display:block;border:2px solid rgba(212,160,23,0.5)">
             </span>
             <span class="logo-text">
-                <span class="logo-crypto">Dollar</span><span class="logo-only">bull university</span>
+                <span class="logo-crypto">Dollar Bull</span><br>
+                <span class="logo-only" style="font-size:0.78em;letter-spacing:0.06em">University</span>
             </span>
         </a>
         <ul class="nav-links" role="list">
@@ -447,8 +446,11 @@ body.drawer-open { overflow: hidden; }
                     </a>
                 </li>
             </ul>
-            <div class="drawer-footer">
-                <span class="logo-crypto">Dollar</span><span class="logo-only">bull university</span>
+            <div class="drawer-footer" style="display:flex;align-items:center;gap:10px">
+                <img src="{{ asset('storage/img/IMG-20260416-WA0036.jpeg') }}"
+                     alt="Dollar Bull University"
+                     style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid rgba(212,160,23,0.4);flex-shrink:0">
+                <span><span class="logo-crypto">Dollar Bull</span> <span class="logo-only">University</span></span>
             </div>
         </div>
     </div>

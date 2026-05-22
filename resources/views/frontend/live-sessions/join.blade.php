@@ -270,15 +270,23 @@
         appendMessage(STUDENT_NAME, msg, true);
 
         try {
-            await fetch(COMMENT_URL, {
+            const res = await fetch(COMMENT_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': CSRF,
                     'Accept': 'application/json',
                 },
+                credentials: 'same-origin',
                 body: JSON.stringify({ message: msg }),
             });
+
+            if (!res.ok) {
+                // Show a subtle error indicator on the last message
+                const last = msgBox.lastElementChild;
+                if (last) last.style.opacity = '0.45';
+                console.error('Chat POST failed:', res.status, await res.text());
+            }
         } catch (err) {
             console.error('Chat send error:', err);
         } finally {

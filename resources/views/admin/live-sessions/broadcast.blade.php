@@ -189,9 +189,10 @@
         .chat-msg-time { font-size: .62rem; color: var(--muted); }
         .chat-msg-text { font-size: .78rem; color: var(--text); line-height: 1.4; word-break: break-word; }
         .chat-msg-empty { font-size: .75rem; color: var(--muted); font-style: italic; text-align: center; padding: 16px 0; }
-        /* New message ping */
+        /* Chat messages */
         @keyframes chatIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
-        .chat-msg-new { animation: chatIn .22s ease forwards; }
+        .chat-msg-new  { animation: chatIn .22s ease forwards; }
+        .chat-msg-item { /* history messages — no animation */ }
     </style>
 </head>
 <body>
@@ -317,7 +318,19 @@
                     <div class="panel-label">Live Chat</div>
                 </div>
                 <div class="chat-messages" id="chatMessages">
-                    <p class="chat-msg-empty" id="chatEmpty">No messages yet...</p>
+                    @if($chatMessages->isEmpty())
+                        <p class="chat-msg-empty" id="chatEmpty">No messages yet...</p>
+                    @else
+                        @foreach($chatMessages as $cm)
+                            <div class="chat-msg-item">
+                                <div class="chat-msg-meta">
+                                    <span class="chat-msg-name">{{ e($cm->student_name) }}</span>
+                                    <span class="chat-msg-time">{{ $cm->created_at->format('H:i') }}</span>
+                                </div>
+                                <div class="chat-msg-text">{{ e($cm->message) }}</div>
+                            </div>
+                        @endforeach
+                    @endif
                 </div>
             </div>
         </aside>
@@ -897,6 +910,12 @@
         d.textContent = String(str || '');
         return d.innerHTML;
     }
+
+    // Scroll chat to bottom on load (show most recent history)
+    (function () {
+        const box = document.getElementById('chatMessages');
+        if (box) box.scrollTop = box.scrollHeight;
+    })();
 })();
 </script>
 </body>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\LiveSession;
 use App\Models\LiveSessionEnrollment;
+use App\Models\LiveSessionMessage;
 use App\Events\SessionWentLive;
 use App\Events\SessionEnded;
 use App\Services\AgoraTokenService;
@@ -137,8 +138,12 @@ class LiveSessionController extends Controller
             ->latest()
             ->get();
 
+        $chatMessages = LiveSessionMessage::where('live_session_id', $id)
+            ->orderBy('created_at')
+            ->get();
+
         return view('admin.live-sessions.broadcast', compact(
-            'session', 'appId', 'channelName', 'token', 'uid', 'approvedCount', 'pendingEnrollments'
+            'session', 'appId', 'channelName', 'token', 'uid', 'approvedCount', 'pendingEnrollments', 'chatMessages'
         ));
     }
 
