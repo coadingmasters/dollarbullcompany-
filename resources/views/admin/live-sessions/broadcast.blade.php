@@ -80,20 +80,22 @@
         .conn-status.error .conn-dot { background: var(--red); }
 
         /* ── Side panel ── */
-        .side-panel { background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-        .panel-section { padding: 12px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .panel-label { font-family: 'Cinzel', serif; font-size: .55rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
-        .info-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: .8rem; }
+        .side-panel { background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; height: 100%; }
+        /* Top info block — scrollable, never taller than 50% */
+        .side-top { flex-shrink: 0; overflow-y: auto; max-height: 50%; border-bottom: 2px solid rgba(212,160,23,.2); }
+        .panel-section { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+        .panel-label { font-family: 'Cinzel', serif; font-size: .52rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: .75rem; }
         .info-row .label { color: var(--muted); }
-        .info-row .value { color: var(--text); font-size: .78rem; }
-        .channel-code { font-family: monospace; font-size: .7rem; color: var(--gold-light); word-break: break-all; }
+        .info-row .value { color: var(--text); font-size: .73rem; }
+        .channel-code { font-family: monospace; font-size: .65rem; color: var(--gold-light); word-break: break-all; }
 
-        /* Viewer list */
-        .viewer-section { max-height: 90px; overflow-y: auto; padding: 8px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .viewer-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); }
-        .viewer-avatar { width: 28px; height: 28px; border-radius: 50%; background: rgba(212,160,23,.15); border: 1px solid rgba(212,160,23,.25); display: flex; align-items: center; justify-content: center; font-family: 'Cinzel', serif; font-size: .65rem; color: var(--gold-light); flex-shrink: 0; }
-        .viewer-name { font-size: .78rem; color: var(--text); }
-        .viewer-empty { font-size: .78rem; color: var(--muted); text-align: center; padding: 20px 0; font-style: italic; }
+        /* Viewer list (compact, inside side-top) */
+        .viewer-section { padding: 8px 14px; border-bottom: 1px solid var(--border); }
+        .viewer-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+        .viewer-avatar { width: 24px; height: 24px; border-radius: 50%; background: rgba(212,160,23,.15); border: 1px solid rgba(212,160,23,.25); display: flex; align-items: center; justify-content: center; font-family: 'Cinzel', serif; font-size: .6rem; color: var(--gold-light); flex-shrink: 0; }
+        .viewer-name { font-size: .74rem; color: var(--text); }
+        .viewer-empty { font-size: .72rem; color: var(--muted); font-style: italic; }
 
         /* ── Bottom control bar ── */
         .controls {
@@ -179,18 +181,33 @@
         .pa-approve { flex:1; padding:4px 0; background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.35); color:#86efac; font-family:'Cinzel',serif; font-size:.5rem; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; }
         .pa-reject  { flex:1; padding:4px 0; background:rgba(239,68,68,.1);  border:1px solid rgba(239,68,68,.3);  color:#fca5a5; font-family:'Cinzel',serif; font-size:.5rem; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; }
 
-        /* ── Live Chat (admin receives) ── */
-        .chat-section { flex: 1; display: flex; flex-direction: column; min-height: 220px; overflow: hidden; border-top: 1px solid var(--border); }
-        .chat-section-header { padding: 10px 16px 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; gap: 6px; background: var(--card); }
-        .chat-section-header .panel-label { margin: 0; }
-        .chat-messages { flex: 1; overflow-y: auto; padding: 8px 14px 12px; display: flex; flex-direction: column; gap: 9px; min-height: 0; }
-        .chat-msg-meta { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px; }
-        .chat-msg-name { font-size: .68rem; color: var(--gold-light); font-weight: 600; }
-        .chat-msg-time { font-size: .62rem; color: var(--muted); }
-        .chat-msg-text { font-size: .78rem; color: var(--text); line-height: 1.4; word-break: break-word; }
-        .chat-msg-empty { font-size: .75rem; color: var(--muted); font-style: italic; text-align: center; padding: 20px 0; }
-        @keyframes chatIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
-        .chat-msg-new  { animation: chatIn .22s ease forwards; }
+        /* ── Live Chat — takes all remaining height ── */
+        .chat-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--surface); min-height: 0; }
+        .chat-section-header {
+            padding: 9px 14px 8px; border-bottom: 1px solid var(--border);
+            flex-shrink: 0; display: flex; align-items: center; gap: 7px;
+            background: var(--card);
+        }
+        .chat-section-header .panel-label { margin: 0; font-size: .54rem; }
+        .chat-live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 1.4s ease-in-out infinite; flex-shrink: 0; }
+        .chat-msg-count { margin-left: auto; font-family: 'Cinzel', serif; font-size: .5rem; color: var(--muted); letter-spacing: .1em; }
+        /* Message list — scrolls independently */
+        .chat-messages {
+            flex: 1; overflow-y: auto; padding: 10px 14px 14px;
+            display: flex; flex-direction: column; gap: 10px; min-height: 0;
+            scrollbar-width: thin; scrollbar-color: rgba(212,160,23,.25) transparent;
+        }
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-track { background: transparent; }
+        .chat-messages::-webkit-scrollbar-thumb { background: rgba(212,160,23,.3); border-radius: 2px; }
+        .chat-msg-bubble { background: rgba(255,255,255,.04); border: 1px solid var(--border); border-left: 2px solid rgba(212,160,23,.35); padding: 8px 10px; border-radius: 2px; }
+        .chat-msg-meta { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+        .chat-msg-name { font-size: .68rem; color: var(--gold-light); font-weight: 600; letter-spacing: .02em; }
+        .chat-msg-time { font-size: .6rem; color: var(--muted); }
+        .chat-msg-text { font-size: .8rem; color: var(--text); line-height: 1.45; word-break: break-word; }
+        .chat-msg-empty { font-size: .74rem; color: var(--muted); font-style: italic; text-align: center; padding: 24px 0; }
+        @keyframes chatIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+        .chat-msg-new { animation: chatIn .2s ease forwards; }
         .chat-msg-item { }
     </style>
 </head>
@@ -243,85 +260,88 @@
 
         {{-- SIDE PANEL --}}
         <aside class="side-panel">
-            <div class="panel-section">
-                <div class="panel-label">Session Info</div>
-                <div class="info-row">
-                    <span class="label">Title</span>
-                    <span class="value">{{ Str::limit($session->title, 22) }}</span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Started</span>
-                    <span class="value">{{ $session->started_at?->format('g:i A') }}</span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Approved</span>
-                    <span class="value" id="sideViewerCount">{{ $approvedCount }} students</span>
-                </div>
-                <div class="panel-label" style="margin-top:12px">Channel</div>
-                <div class="channel-code">{{ $channelName }}</div>
-            </div>
 
-            <div class="panel-section">
-                <div class="panel-label">Your Stream</div>
-                <div class="info-row">
-                    <span class="label">Microphone</span>
-                    <span id="micStatus" style="font-size:.75rem;color:#86efac">On</span>
+            {{-- TOP BLOCK: info sections, max 50% height, scrollable --}}
+            <div class="side-top">
+                <div class="panel-section">
+                    <div class="panel-label">Session Info</div>
+                    <div class="info-row">
+                        <span class="label">Title</span>
+                        <span class="value">{{ Str::limit($session->title, 20) }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Started</span>
+                        <span class="value">{{ $session->started_at?->format('g:i A') }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Approved</span>
+                        <span class="value" id="sideViewerCount">{{ $approvedCount }} students</span>
+                    </div>
                 </div>
-                <div class="info-row">
-                    <span class="label">Camera</span>
-                    <span id="camStatus" style="font-size:.75rem;color:#86efac">On</span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Screen</span>
-                    <span id="screenStatus" style="font-size:.75rem;color:var(--muted)">Off</span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Role</span>
-                    <span style="font-size:.75rem;color:var(--gold-light)">Host</span>
-                </div>
-            </div>
 
-            {{-- Pending Enrollments --}}
-            <div class="panel-section" style="flex-shrink:0">
-                <div class="panel-label" style="display:flex;align-items:center;gap:6px">
-                    Pending
-                    <span id="pendingBadge" style="background:rgba(239,68,68,.22);border:1px solid rgba(239,68,68,.4);color:#fca5a5;padding:1px 7px;font-size:.58rem;border-radius:2px">{{ $pendingEnrollments->count() }}</span>
+                <div class="panel-section">
+                    <div class="panel-label">Your Stream</div>
+                    <div class="info-row">
+                        <span class="label">Mic</span>
+                        <span id="micStatus" style="font-size:.73rem;color:#86efac">On</span>
+                        <span class="label" style="margin-left:8px">Cam</span>
+                        <span id="camStatus" style="font-size:.73rem;color:#86efac">On</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Screen</span>
+                        <span id="screenStatus" style="font-size:.73rem;color:var(--muted)">Off</span>
+                        <span class="label" style="margin-left:8px">Role</span>
+                        <span style="font-size:.73rem;color:var(--gold-light)">Host</span>
+                    </div>
                 </div>
-                <div id="pendingList" style="max-height:180px;overflow-y:auto">
-                    @forelse($pendingEnrollments as $pe)
-                        <div class="pending-item" id="pitem-{{ $pe->id }}">
-                            <div class="pending-name">{{ trim(($pe->first_name ?? '') . ' ' . ($pe->last_name ?? '')) ?: 'Student' }}</div>
-                            <div class="pending-email">{{ $pe->email }}</div>
-                            <div class="pending-actions">
-                                <button class="pa-approve" onclick="enrollAction({{ $pe->id }},'approve',this)">Approve</button>
-                                <button class="pa-reject"  onclick="enrollAction({{ $pe->id }},'reject',this)">Reject</button>
+
+                {{-- Pending Enrollments --}}
+                <div class="panel-section">
+                    <div class="panel-label" style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+                        Pending
+                        <span id="pendingBadge" style="background:rgba(239,68,68,.22);border:1px solid rgba(239,68,68,.4);color:#fca5a5;padding:1px 7px;font-size:.56rem;border-radius:2px">{{ $pendingEnrollments->count() }}</span>
+                    </div>
+                    <div id="pendingList" style="max-height:110px;overflow-y:auto">
+                        @forelse($pendingEnrollments as $pe)
+                            <div class="pending-item" id="pitem-{{ $pe->id }}">
+                                <div class="pending-name">{{ trim(($pe->first_name ?? '') . ' ' . ($pe->last_name ?? '')) ?: 'Student' }}</div>
+                                <div class="pending-email">{{ $pe->email }}</div>
+                                <div class="pending-actions">
+                                    <button class="pa-approve" onclick="enrollAction({{ $pe->id }},'approve',this)">Approve</button>
+                                    <button class="pa-reject"  onclick="enrollAction({{ $pe->id }},'reject',this)">Reject</button>
+                                </div>
                             </div>
-                        </div>
-                    @empty
-                        <p id="pendingEmpty" style="font-size:.72rem;color:var(--muted);font-style:italic;padding:6px 0">No pending enrollments</p>
-                    @endforelse
+                        @empty
+                            <p id="pendingEmpty" style="font-size:.7rem;color:var(--muted);font-style:italic;padding:4px 0">No pending enrollments</p>
+                        @endforelse
+                    </div>
                 </div>
-            </div>
 
-            <div class="viewer-section">
-                <div class="panel-label">Live Viewers</div>
-                <div id="viewerList">
-                    <p class="viewer-empty">No viewers connected yet</p>
+                <div class="viewer-section">
+                    <div class="panel-label" style="margin-bottom:4px">
+                        Live Viewers
+                        <span id="viewerCountBadge" style="margin-left:4px;color:var(--muted);font-size:.5rem">— 0 connected</span>
+                    </div>
+                    <div id="viewerList">
+                        <span class="viewer-empty">No viewers connected yet</span>
+                    </div>
                 </div>
-            </div>
+            </div>{{-- /side-top --}}
 
-            {{-- Live Chat (real-time comments from viewers) --}}
+            {{-- LIVE CHAT — fills ALL remaining height --}}
             <div class="chat-section">
                 <div class="chat-section-header">
+                    <span class="chat-live-dot"></span>
                     <svg style="width:11px;height:11px;stroke:var(--gold);fill:none;stroke-width:2;flex-shrink:0" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-                    <div class="panel-label">Live Chat</div>
+                    <div class="panel-label" style="margin:0">Live Chat</div>
+                    <span class="chat-msg-count" id="chatCount">0 messages</span>
                 </div>
                 <div class="chat-messages" id="chatMessages">
                     @if($chatMessages->isEmpty())
                         <p class="chat-msg-empty" id="chatEmpty">No messages yet...</p>
                     @else
                         @foreach($chatMessages as $cm)
-                            <div class="chat-msg-item">
+                            <div class="chat-msg-bubble chat-msg-item">
                                 <div class="chat-msg-meta">
                                     <span class="chat-msg-name">{{ e($cm->student_name) }}</span>
                                     <span class="chat-msg-time">{{ $cm->created_at->format('H:i') }}</span>
@@ -332,6 +352,7 @@
                     @endif
                 </div>
             </div>
+
         </aside>
     </div>
 
@@ -548,6 +569,11 @@
     }
 
     // ── Viewer list ──────────────────────────────────────
+    function updateViewerBadge(n) {
+        const b = document.getElementById('viewerCountBadge');
+        if (b) b.textContent = '— ' + n + ' connected';
+    }
+
     function addViewerItem(uid) {
         const list = document.getElementById('viewerList');
         const empty = list.querySelector('.viewer-empty');
@@ -557,13 +583,16 @@
         item.id = 'viewer-' + uid;
         item.innerHTML = '<div class="viewer-avatar">' + String(uid).charAt(0) + '</div><div class="viewer-name">Viewer #' + uid + '</div>';
         list.appendChild(item);
+        updateViewerBadge(document.querySelectorAll('.viewer-item').length);
     }
     function removeViewerItem(uid) {
         const el = document.getElementById('viewer-' + uid);
         if (el) el.remove();
         const list = document.getElementById('viewerList');
-        if (!list.querySelector('.viewer-item')) {
-            list.innerHTML = '<p class="viewer-empty">No viewers connected</p>';
+        const remaining = list.querySelectorAll('.viewer-item').length;
+        updateViewerBadge(remaining);
+        if (remaining === 0) {
+            list.innerHTML = '<span class="viewer-empty">No viewers connected</span>';
         }
     }
 
@@ -865,24 +894,21 @@
         } catch (err) { /* silent */ }
     }
 
-    // Scroll chat history to bottom on load
-    (function () {
-        const box = document.getElementById('chatMessages');
-        if (box) box.scrollTop = box.scrollHeight;
-    })();
 
     // Poll every 4 seconds (works with or without Pusher)
     setInterval(pollPending, 4000);
     setInterval(pollMessages, 4000);
 
     // ── Live Chat helpers ─────────────────────────────────
+    let chatMsgCount = document.querySelectorAll('.chat-msg-item, .chat-msg-new').length;
+
     function addChatMessage(name, message, time) {
         const empty = document.getElementById('chatEmpty');
         if (empty) empty.remove();
 
         const box = document.getElementById('chatMessages');
         const el  = document.createElement('div');
-        el.className = 'chat-msg-new';
+        el.className = 'chat-msg-bubble chat-msg-new';
         el.innerHTML =
             '<div class="chat-msg-meta">' +
                 '<span class="chat-msg-name">' + esc(name) + '</span>' +
@@ -891,7 +917,21 @@
             '<div class="chat-msg-text">' + esc(message) + '</div>';
         box.appendChild(el);
         box.scrollTop = box.scrollHeight;
+
+        chatMsgCount++;
+        const countEl = document.getElementById('chatCount');
+        if (countEl) countEl.textContent = chatMsgCount + (chatMsgCount === 1 ? ' message' : ' messages');
     }
+
+    // Seed count from history messages on load
+    (function() {
+        const hist = document.querySelectorAll('#chatMessages .chat-msg-item');
+        if (hist.length > 0) {
+            chatMsgCount = hist.length;
+            const countEl = document.getElementById('chatCount');
+            if (countEl) countEl.textContent = chatMsgCount + (chatMsgCount === 1 ? ' message' : ' messages');
+        }
+    })();
 
     // ── Pending list helpers ──────────────────────────────
     function addToPendingList(data) {
