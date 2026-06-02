@@ -405,43 +405,99 @@ body{background:var(--black);color:var(--wd);font-family:'Crimson Pro',Georgia,s
     </div>
 </div>
 
-{{-- ════════ TEAM ════════ --}}
+{{-- ════════ CEO MESSAGE ════════ --}}
 <section class="section alt">
     <div class="container">
-        <div class="sec-head fu">
-            <div class="sec-eyebrow"><span class="sec-eyebrow-line"></span>The People<span class="sec-eyebrow-line r"></span></div>
-            <h2 class="sec-title">Meet the <span>Expert Team</span></h2>
-            <p class="sec-desc">Certified analysts, former institutional traders, and DeFi specialists — all working for you.</p>
-        </div>
-        <div class="team-grid">
-            @php
-            $team = [
-                ['img'=>'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80','name'=>'Badar Tanvir','role'=>'Founder & CEO','bio'=>'Ex-institutional trader with 12 years in derivatives markets. Founded CryptoOnly to bridge the gap between retail and institutional crypto.'],
-                ['img'=>'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80','name'=>'Sara Malik','role'=>'Head of Research','bio'=>'Certified Blockchain Expert and DeFi protocol researcher. Leads our signal generation and market analysis division.'],
-                ['img'=>'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80','name'=>'Omar Raza','role'=>'Lead Analyst','bio'=>'Technical analysis specialist with expertise in Elliott Wave, Smart Money Concepts, and liquidity-based trading strategies.'],
-                ['img'=>'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80','name'=>'Fatima Ali','role'=>'Education Director','bio'=>'Former university lecturer turned crypto educator. Designed all 40+ courses on the platform with a focus on practical, results-driven learning.'],
-            ];
-            @endphp
-            @foreach($team as $i => $member)
-            <div class="team-card" style="transition-delay:{{ $i * 0.1 }}s" data-anim>
-                <div class="tc-img-wrap">
-                    <img src="{{ $member['img'] }}" alt="{{ $member['name'] }}" loading="lazy">
-                    <div class="tc-img-overlay"></div>
-                    <div class="tc-social">
-                        <a href="#" class="tc-soc-btn" aria-label="Twitter">𝕏</a>
-                        <a href="#" class="tc-soc-btn" aria-label="LinkedIn">in</a>
-                    </div>
-                </div>
-                <div class="tc-body">
-                    <div class="tc-name">{{ $member['name'] }}</div>
-                    <div class="tc-role">{{ $member['role'] }}</div>
-                    <p class="tc-bio">{{ $member['bio'] }}</p>
-                </div>
+        <div class="ceo-spotlight fu">
+            <div class="ceo-eyebrow"><span class="sec-eyebrow-line"></span>A Word From Our Founder<span class="sec-eyebrow-line r"></span></div>
+            <h2 class="ceo-name">Saqib Khan</h2>
+            <div class="ceo-title-badge">Founder &amp; Chief Executive Officer</div>
+            <div class="ceo-rule"></div>
+            <blockquote class="ceo-quote">
+                "The Forex market does not reward guesswork — it rewards discipline, precision, and an institutional mindset. Dollar Bull University exists to give every serious trader exactly that edge."
+            </blockquote>
+            <p class="ceo-desc">
+                With over <strong>14 years of active experience</strong> in global foreign exchange markets, Saqib Khan has traded G10 majors, EM currency pairs, and cross-border derivatives across institutional and proprietary desks. His deep expertise in Smart Money Concepts, interbank liquidity flow, and macroeconomic positioning forms the backbone of every strategy taught at Dollar Bull University. Saqib founded the platform with a singular conviction: that retail traders, given the right knowledge and tools, can compete at the highest level of the $7.5 trillion-a-day Forex market.
+            </p>
+            <div class="ceo-stats">
+                <div class="ceo-stat"><span class="ceo-stat-val">14+</span><span class="ceo-stat-lbl">Years Trading</span></div>
+                <div class="ceo-stat-div"></div>
+                <div class="ceo-stat"><span class="ceo-stat-val">$7.5T</span><span class="ceo-stat-lbl">Daily FX Market</span></div>
+                <div class="ceo-stat-div"></div>
+                <div class="ceo-stat"><span class="ceo-stat-val">320K+</span><span class="ceo-stat-lbl">Students Taught</span></div>
             </div>
-            @endforeach
         </div>
     </div>
 </section>
+
+<style>
+.ceo-spotlight{
+    max-width:780px;margin:0 auto;text-align:center;
+    padding:60px 40px;border:1px solid var(--bb);border-radius:4px;
+    background:var(--black);position:relative;overflow:hidden;
+}
+.ceo-spotlight::before{
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(ellipse at 50% 0%,rgba(212,160,23,.06) 0%,transparent 65%);
+    pointer-events:none;
+}
+.ceo-eyebrow{
+    display:inline-flex;align-items:center;gap:10px;
+    font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.28em;
+    text-transform:uppercase;color:var(--gold);margin-bottom:28px;
+}
+.ceo-name{
+    font-family:'Cinzel',serif;font-size:clamp(2rem,5vw,3.2rem);
+    font-weight:900;letter-spacing:.06em;
+    background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    line-height:1.1;margin-bottom:12px;
+}
+.ceo-title-badge{
+    display:inline-block;
+    font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--wf);
+    border:1px solid rgba(212,160,23,.25);border-radius:2px;
+    padding:6px 18px;margin-bottom:32px;
+}
+.ceo-rule{
+    width:64px;height:2px;margin:0 auto 32px;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
+    border:none;
+}
+.ceo-quote{
+    font-family:'Crimson Pro',Georgia,serif;font-size:clamp(1.05rem,2.2vw,1.3rem);
+    font-style:italic;font-weight:300;
+    color:var(--white);line-height:1.8;
+    border-left:3px solid var(--gold);
+    padding:0 28px;margin:0 0 28px;text-align:left;
+    position:relative;z-index:1;
+}
+.ceo-desc{
+    font-size:1rem;font-weight:300;color:var(--wf);
+    line-height:1.9;text-align:left;margin-bottom:40px;
+    position:relative;z-index:1;
+}
+.ceo-desc strong{color:var(--gold-light);font-weight:600;font-style:normal}
+.ceo-stats{
+    display:flex;align-items:center;justify-content:center;gap:0;
+    border-top:1px solid var(--bb);padding-top:32px;position:relative;z-index:1;
+}
+.ceo-stat{text-align:center;padding:0 36px}
+.ceo-stat-val{
+    display:block;font-family:'Cinzel',serif;font-size:clamp(1.4rem,3vw,2rem);font-weight:700;
+    background:linear-gradient(135deg,var(--gold-light),var(--gold));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    line-height:1;margin-bottom:6px;
+}
+.ceo-stat-lbl{display:block;font-family:'Cinzel',serif;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--wf)}
+.ceo-stat-div{width:1px;height:40px;background:var(--bb)}
+@media(max-width:600px){
+    .ceo-spotlight{padding:40px 20px}
+    .ceo-stat{padding:0 18px}
+    .ceo-quote{padding:0 16px}
+}
+</style>
 
 {{-- ════════ VALUES ════════ --}}
 <section class="section">
