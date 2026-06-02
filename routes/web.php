@@ -162,6 +162,8 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::post('live-sessions/{id}/end', [AdminLiveSessionController::class, 'endSession'])->name('admin.live-sessions.end');
     Route::post('live-sessions/{id}/enrollments/{enrollmentId}/approve', [AdminLiveSessionController::class, 'approveEnrollment'])->name('admin.live-sessions.enrollments.approve');
     Route::post('live-sessions/{id}/enrollments/{enrollmentId}/reject', [AdminLiveSessionController::class, 'rejectEnrollment'])->name('admin.live-sessions.enrollments.reject');
+    Route::get('live-sessions/{id}/poll-pending', [AdminLiveSessionController::class, 'pollPending'])->name('admin.live-sessions.poll-pending');
+    Route::get('live-sessions/{id}/poll-messages', [AdminLiveSessionController::class, 'pollMessages'])->name('admin.live-sessions.poll-messages');
 
     // Hero Slider Management
     Route::resource('sliders', SliderController::class)->names([

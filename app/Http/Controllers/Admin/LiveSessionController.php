@@ -142,8 +142,10 @@ class LiveSessionController extends Controller
             ->orderBy('created_at')
             ->get();
 
+        $lastMessageId = $chatMessages->last()?->id ?? 0;
+
         return view('admin.live-sessions.broadcast', compact(
-            'session', 'appId', 'channelName', 'token', 'uid', 'approvedCount', 'pendingEnrollments', 'chatMessages'
+            'session', 'appId', 'channelName', 'token', 'uid', 'approvedCount', 'pendingEnrollments', 'chatMessages', 'lastMessageId'
         ));
     }
 
@@ -192,6 +194,49 @@ class LiveSessionController extends Controller
         $rejected = $enrollments->where('status', 'rejected')->count();
 
         return view('admin.live-session-enrollments', compact('enrollments', 'total', 'pending', 'approved', 'rejected'));
+    }
+
+    public function pollPending(Request $request, $id)
+    {
+        $since = $request->integer('since', 0);
+
+        $enrollments = LiveSessionEnrollment::where('live_session_id', $id)
+            ->where('status', 'pending')
+            ->where('id', '>', $since)
+            ->orderBy('id')
+            ->get()
+            ->map(function ($e) {
+                $name = trim(($e->first_name ?? '') . ' ' . ($e->last_name ?? ''));
+                return [
+                    'enrollment_id' => $e->id,
+                    'name'          => $name ?: 'New Student',
+                    'email'         => $e->email ?? '',
+                    'country'       => $e->country ?? '',
+                    'whatsapp'      => $e->whatsapp_number ?? '',
+                ];
+            });
+
+        return response()->json(['enrollments' => $enrollments]);
+    }
+
+    public function pollMessages(Request $request, $id)
+    {
+        $since = $request->integer('since', 0);
+
+        $messages = LiveSessionMessage::where('live_session_id', $id)
+            ->where('id', '>', $since)
+            ->orderBy('id')
+            ->get()
+            ->map(function ($m) {
+                return [
+                    'id'      => $m->id,
+                    'name'    => $m->student_name,
+                    'message' => $m->message,
+                    'time'    => $m->created_at->format('H:i'),
+                ];
+            });
+
+        return response()->json(['messages' => $messages]);
     }
 
     public function approveEnrollmentDirect($enrollmentId)

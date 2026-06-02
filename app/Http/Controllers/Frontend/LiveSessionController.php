@@ -78,7 +78,11 @@ class LiveSessionController extends Controller
             'payment_screenshot' => $data['payment_screenshot'],
         ]);
 
-        event(new NewLiveSessionEnrollment($enrollment));
+        try {
+            event(new NewLiveSessionEnrollment($enrollment));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('NewLiveSessionEnrollment broadcast failed: ' . $e->getMessage());
+        }
 
         return redirect()->route('live-sessions.register.success', $session->id)
             ->with('success', 'Registration submitted! Admin will review and contact you within 48 hours.');
@@ -143,7 +147,11 @@ class LiveSessionController extends Controller
             'enrolled_at' => now(),
         ]);
 
-        event(new NewLiveSessionEnrollment($enrollment));
+        try {
+            event(new NewLiveSessionEnrollment($enrollment));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('NewLiveSessionEnrollment broadcast failed: ' . $e->getMessage());
+        }
 
         return back()->with('success', 'Enrolled successfully, please wait for admin approval');
     }

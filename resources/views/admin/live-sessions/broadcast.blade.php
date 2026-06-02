@@ -768,25 +768,115 @@
     const CSRF         = document.querySelector('meta[name="csrf-token"]').content;
     const APPROVE_URL  = (id) => '/admin/live-session-enrollments/' + id + '/approve';
     const REJECT_URL   = (id) => '/admin/live-session-enrollments/' + id + '/reject';
+    const POLL_PENDING = '/admin/live-sessions/' + SESSION_ID + '/poll-pending';
+    const POLL_MSGS    = '/admin/live-sessions/' + SESSION_ID + '/poll-messages';
 
-    let pendingCount = parseInt(document.getElementById('pendingBadge').textContent, 10) || 0;
+    let pendingCount    = parseInt(document.getElementById('pendingBadge').textContent, 10) || 0;
+    let seenEnrollIds   = new Set();
+    let lastMsgId       = @json($lastMessageId);
+    let pusherConnected = false;
+
+    // Seed already-shown pending items so polling doesn't duplicate them
+    document.querySelectorAll('.pending-item[id^="pitem-"]').forEach(function (el) {
+        seenEnrollIds.add(parseInt(el.id.replace('pitem-', ''), 10));
+    });
+
+    // ── Pusher status pill (we add it to the topbar) ──────
+    const statusPill = document.createElement('span');
+    statusPill.id = 'rtStatus';
+    statusPill.style.cssText = 'font-family:Cinzel,serif;font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;padding:3px 9px;border-radius:2px;border:1px solid;transition:all .3s';
+    setPillState('connecting');
+    document.querySelector('.topbar-right').prepend(statusPill);
+
+    function setPillState(state) {
+        const states = {
+            connecting: ['Connecting…',  'rgba(234,179,8,.15)',  'rgba(234,179,8,.4)',  '#fde047'],
+            live:       ['● Real-Time',  'rgba(34,197,94,.12)',  'rgba(34,197,94,.4)',  '#86efac'],
+            poll:       ['↻ Polling',    'rgba(99,102,241,.12)', 'rgba(99,102,241,.4)', '#a5b4fc'],
+            error:      ['⚠ No Signal',  'rgba(239,68,68,.12)',  'rgba(239,68,68,.4)',  '#fca5a5'],
+        };
+        const [text, bg, border, color] = states[state] || states.connecting;
+        statusPill.textContent      = text;
+        statusPill.style.background = bg;
+        statusPill.style.borderColor = border;
+        statusPill.style.color      = color;
+    }
 
     // ── Pusher connection ─────────────────────────────────
     const pusher  = new Pusher(PUSHER_KEY, { cluster: PUSHER_CLUST, forceTLS: true });
     const channel = pusher.subscribe('live-session-admin.' + SESSION_ID);
 
+    pusher.connection.bind('connected', function () {
+        pusherConnected = true;
+        setPillState('live');
+    });
+    pusher.connection.bind('disconnected', function () {
+        pusherConnected = false;
+        setPillState('poll');
+    });
+    pusher.connection.bind('failed', function () {
+        pusherConnected = false;
+        setPillState('error');
+    });
+
     channel.bind('new-enrollment', function (data) {
+        if (seenEnrollIds.has(data.enrollment_id)) return;
+        seenEnrollIds.add(data.enrollment_id);
         addToPendingList(data);
         showNotifCard(data);
         pendingCount++;
         updateBadge();
     });
 
-    // ── Live Chat ─────────────────────────────────────────
     channel.bind('new-comment', function (data) {
+        const id = data.id || 0;
+        if (id && id <= lastMsgId) return;
+        if (id) lastMsgId = id;
         addChatMessage(data.name, data.message, data.time);
     });
 
+    // ── AJAX Polling fallback (always runs, deduplication handles doubles) ──
+    async function pollPending() {
+        const maxSeen = seenEnrollIds.size > 0 ? Math.max(...seenEnrollIds) : 0;
+        try {
+            const res  = await fetch(POLL_PENDING + '?since=' + maxSeen, { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) return;
+            const data = await res.json();
+            (data.enrollments || []).forEach(function (e) {
+                if (seenEnrollIds.has(e.enrollment_id)) return;
+                seenEnrollIds.add(e.enrollment_id);
+                addToPendingList(e);
+                showNotifCard(e);
+                pendingCount++;
+                updateBadge();
+            });
+        } catch (err) { /* silent */ }
+    }
+
+    async function pollMessages() {
+        try {
+            const res  = await fetch(POLL_MSGS + '?since=' + lastMsgId, { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) return;
+            const data = await res.json();
+            (data.messages || []).forEach(function (m) {
+                if (m.id <= lastMsgId) return;
+                lastMsgId = m.id;
+                addChatMessage(m.name, m.message, m.time);
+            });
+        } catch (err) { /* silent */ }
+    }
+
+    // Scroll chat history to bottom on load
+    (function () {
+        const box = document.getElementById('chatMessages');
+        if (box) box.scrollTop = box.scrollHeight;
+    })();
+
+    // Poll every 4 seconds (works with or without Pusher)
+    setInterval(pollPending, 4000);
+    setInterval(pollMessages, 4000);
+
+    // ── Live Chat helpers ─────────────────────────────────
     function addChatMessage(name, message, time) {
         const empty = document.getElementById('chatEmpty');
         if (empty) empty.remove();
@@ -842,8 +932,6 @@
               '<button class="notif-reject"  onclick="enrollAction(' + data.enrollment_id + ',\'reject\',this)">✕ Reject</button>' +
             '</div>';
         stack.appendChild(card);
-
-        // Auto-dismiss after 60s if no action taken
         setTimeout(() => dismissCard('notif-' + data.enrollment_id), 60000);
     }
 
@@ -854,7 +942,7 @@
         setTimeout(() => card && card.remove(), 280);
     }
 
-    // ── Approve / Reject (called from both list and toast) ─
+    // ── Approve / Reject ──────────────────────────────────
     window.enrollAction = async function (enrollmentId, action, btn) {
         btn.disabled = true;
         btn.textContent = action === 'approve' ? 'Approving…' : 'Rejecting…';
@@ -869,7 +957,6 @@
 
             if (!res.ok) throw new Error('Request failed');
 
-            // Remove from pending list
             const pitem = document.getElementById('pitem-' + enrollmentId);
             if (pitem) pitem.remove();
             if (!document.querySelector('.pending-item')) {
@@ -877,10 +964,8 @@
                     '<p id="pendingEmpty" style="font-size:.72rem;color:var(--muted);font-style:italic;padding:6px 0">No pending enrollments</p>';
             }
 
-            // Remove toast card
             dismissCard('notif-' + enrollmentId);
 
-            // Update counts
             pendingCount = Math.max(0, pendingCount - 1);
             updateBadge();
             if (action === 'approve') {
@@ -898,11 +983,9 @@
     function updateBadge() {
         const badge = document.getElementById('pendingBadge');
         badge.textContent = pendingCount;
-        badge.style.background = pendingCount > 0
-            ? 'rgba(239,68,68,.22)' : 'rgba(255,255,255,.06)';
-        badge.style.borderColor = pendingCount > 0
-            ? 'rgba(239,68,68,.4)' : 'rgba(255,255,255,.12)';
-        badge.style.color = pendingCount > 0 ? '#fca5a5' : 'var(--muted)';
+        badge.style.background  = pendingCount > 0 ? 'rgba(239,68,68,.22)' : 'rgba(255,255,255,.06)';
+        badge.style.borderColor = pendingCount > 0 ? 'rgba(239,68,68,.4)'  : 'rgba(255,255,255,.12)';
+        badge.style.color       = pendingCount > 0 ? '#fca5a5'             : 'var(--muted)';
     }
 
     function esc(str) {
@@ -910,12 +993,6 @@
         d.textContent = String(str || '');
         return d.innerHTML;
     }
-
-    // Scroll chat to bottom on load (show most recent history)
-    (function () {
-        const box = document.getElementById('chatMessages');
-        if (box) box.scrollTop = box.scrollHeight;
-    })();
 })();
 </script>
 </body>

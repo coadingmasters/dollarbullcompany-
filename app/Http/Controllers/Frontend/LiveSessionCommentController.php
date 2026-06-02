@@ -30,13 +30,17 @@ class LiveSessionCommentController extends Controller
             'message'         => $message,
         ]);
 
-        // Broadcast in real-time to admin broadcast page
-        event(new LiveSessionComment(
-            sessionId: $session->id,
-            name:      $name,
-            message:   $message,
-            time:      $time,
-        ));
+        // Broadcast in real-time to admin broadcast page (silently ignore if Pusher fails)
+        try {
+            event(new LiveSessionComment(
+                sessionId: $session->id,
+                name:      $name,
+                message:   $message,
+                time:      $time,
+            ));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('LiveSessionComment broadcast failed: ' . $e->getMessage());
+        }
 
         return response()->json(['ok' => true, 'name' => $name, 'time' => $time]);
     }
