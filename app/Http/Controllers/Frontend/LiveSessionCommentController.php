@@ -24,7 +24,7 @@ class LiveSessionCommentController extends Controller
         $time    = now()->format('H:i');
 
         // Persist to database so it survives page reloads
-        LiveSessionMessage::create([
+        $saved = LiveSessionMessage::create([
             'live_session_id' => $session->id,
             'student_name'    => $name,
             'message'         => $message,
@@ -34,6 +34,7 @@ class LiveSessionCommentController extends Controller
         try {
             event(new LiveSessionComment(
                 sessionId: $session->id,
+                messageId: $saved->id,
                 name:      $name,
                 message:   $message,
                 time:      $time,

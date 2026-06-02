@@ -8,6 +8,7 @@ use App\Models\LiveSessionEnrollment;
 use App\Models\LiveSessionMessage;
 use App\Events\SessionWentLive;
 use App\Events\SessionEnded;
+use App\Events\EnrollmentApproved;
 use App\Services\AgoraTokenService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -243,6 +244,12 @@ class LiveSessionController extends Controller
     {
         $enrollment = LiveSessionEnrollment::findOrFail($enrollmentId);
         $enrollment->update(['status' => 'approved', 'approved_at' => now()]);
+
+        try {
+            event(new EnrollmentApproved($enrollment));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('EnrollmentApproved broadcast failed: ' . $e->getMessage());
+        }
 
         if (request()->wantsJson()) {
             return response()->json(['success' => true, 'message' => 'Enrollment approved']);

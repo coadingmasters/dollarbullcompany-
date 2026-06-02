@@ -66,22 +66,29 @@
 @endsection
 
 @push('scripts')
+<script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 <script>
 (function () {
-    if (typeof window.Echo === 'undefined') return;
+    const PUSHER_KEY   = @json(config('broadcasting.connections.pusher.key'));
+    const PUSHER_CLUST = @json(config('broadcasting.connections.pusher.options.cluster'));
+    const SESSION_ID   = @json($session->id);
+    const JOIN_URL     = @json(route('live-sessions.join', $session->id));
+    const ENROLLMENT_ID = @json($enrollment?->id);
+    const IS_APPROVED  = @json($enrollment?->isApproved() ?? false);
+    const IS_LIVE      = @json($session->isLive());
 
-    const sessionId = @json($session->id);
-    const badge = document.getElementById('lsStatusBadge');
-    const label = document.getElementById('lsStatusLabel');
-    const dot = document.getElementById('lsStatusDot');
-    const toast = document.getElementById('lsToast');
+    if (!PUSHER_KEY) return;
+
+    const badge      = document.getElementById('lsStatusBadge');
+    const label      = document.getElementById('lsStatusLabel');
+    const toast      = document.getElementById('lsToast');
     const actionsWrap = document.querySelector('[data-ls-actions]');
 
     function showToast(msg) {
         if (!toast) return;
         toast.textContent = msg;
         toast.classList.add('show');
-        setTimeout(function () { toast.classList.remove('show'); }, 5000);
+        setTimeout(function () { toast.classList.remove('show'); }, 6000);
     }
 
     function setBadge(status) {
@@ -89,42 +96,63 @@
         badge.className = 'ls-badge ls-badge-' + status;
         badge.dataset.status = status;
         label.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-        if (status === 'live') {
-            if (!dot && badge) {
-                const d = document.createElement('span');
-                d.className = 'ls-live-dot';
-                d.id = 'lsStatusDot';
-                badge.insertBefore(d, label);
-            }
-        } else if (dot) {
-            dot.remove();
+        const existingDot = badge.querySelector('.ls-live-dot');
+        if (status === 'live' && !existingDot) {
+            const d = document.createElement('span');
+            d.className = 'ls-live-dot';
+            badge.insertBefore(d, label);
+        } else if (status !== 'live' && existingDot) {
+            existingDot.remove();
         }
     }
 
     function showJoinButton() {
         if (!actionsWrap) return;
-        const joinUrl = @json(route('live-sessions.join', $session->id));
-        actionsWrap.innerHTML = '<a href="' + joinUrl + '" class="btn ls-btn-live" data-ls-join-btn><span class="ls-live-dot"></span> Join Live Now</a>';
+        actionsWrap.innerHTML =
+            '<a href="' + JOIN_URL + '" class="btn ls-btn-live" style="animation:fadeIn .4s ease">' +
+            '<span class="ls-live-dot"></span> Join Live Now</a>';
     }
 
-    function hideJoinButton() {
+    function showEndedState() {
         if (!actionsWrap) return;
         actionsWrap.innerHTML = '<span class="ls-pill ls-pill-muted">Session Ended</span>';
     }
 
-    window.Echo.channel('live-session.' + sessionId)
-        .listen('.SessionWentLive', function () {
-            showToast('Session is now LIVE!');
-            setBadge('live');
-            @if($enrollment?->isApproved())
-            showJoinButton();
-            @endif
-        })
-        .listen('.SessionEnded', function () {
-            showToast('Session has ended');
-            setBadge('ended');
-            hideJoinButton();
-        });
+    function showApprovedWaiting() {
+        if (!actionsWrap) return;
+        actionsWrap.innerHTML = '<span class="ls-pill ls-pill-approved" style="animation:fadeIn .4s ease">✓ Approved — Session is now live. Join now!</span>';
+        setTimeout(showJoinButton, 1200);
+    }
+
+    const pusher  = new Pusher(PUSHER_KEY, { cluster: PUSHER_CLUST, forceTLS: true });
+    const channel = pusher.subscribe('live-session.' + SESSION_ID);
+
+    // Session went live
+    channel.bind('SessionWentLive', function () {
+        showToast('🔴 Session is now LIVE!');
+        setBadge('live');
+        if (IS_APPROVED) showJoinButton();
+    });
+
+    // Session ended
+    channel.bind('SessionEnded', function () {
+        showToast('Session has ended.');
+        setBadge('ended');
+        showEndedState();
+    });
+
+    // Admin approved THIS student's enrollment in real-time
+    channel.bind('EnrollmentApproved', function (data) {
+        if (!ENROLLMENT_ID || data.enrollment_id != ENROLLMENT_ID) return;
+        showToast('✓ You have been approved! You can now join the session.');
+        if (IS_LIVE) {
+            showApprovedWaiting();
+        } else {
+            if (actionsWrap) {
+                actionsWrap.innerHTML = '<span class="ls-pill ls-pill-approved" style="animation:fadeIn .4s ease">✓ Approved — Waiting for session to start</span>';
+            }
+        }
+    });
 })();
 </script>
 @endpush

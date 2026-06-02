@@ -13,6 +13,7 @@ class LiveSessionComment implements ShouldBroadcastNow
 
     public function __construct(
         public int    $sessionId,
+        public int    $messageId,
         public string $name,
         public string $message,
         public string $time,
@@ -31,6 +32,7 @@ class LiveSessionComment implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
         return [
+            'id'      => $this->messageId,
             'name'    => $this->name,
             'message' => $this->message,
             'time'    => $this->time,
