@@ -69,23 +69,47 @@ textarea.form-control { resize: vertical; min-height: 80px; }
                 Slide Image
             </div>
 
+            {{-- DESKTOP IMAGE --}}
+            <div style="font-family:Cinzel,serif;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--wf);margin-bottom:8px;display:flex;align-items:center;gap:8px">
+                <svg style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                Desktop Image <span style="color:var(--gold);border:1px solid rgba(212,160,23,.35);padding:1px 8px;border-radius:2px;font-size:.5rem">Recommended: 1920 × 900 px</span>
+            </div>
             <div class="preview-box" id="previewBox">
                 <img id="imgPreview" src="" alt="Preview">
-                <span class="preview-placeholder" id="previewPlaceholder">Image Preview</span>
+                <span class="preview-placeholder" id="previewPlaceholder">Desktop Preview</span>
             </div>
-
             <div class="form-group">
-                <label class="form-label">Upload Image File</label>
+                <label class="form-label">Upload Desktop Image</label>
                 <input type="file" name="image_file" id="imageFile" class="form-control" accept="image/*">
-                <div class="form-hint">Max 5 MB. JPG, PNG, WebP. If provided, overrides URL below.</div>
+                <div class="form-hint">Max 5 MB · JPG, PNG, WebP · Landscape / wide format</div>
+            </div>
+            <div style="text-align:center;color:var(--wf);font-size:.78rem;margin:4px 0">— or —</div>
+            <div class="form-group">
+                <label class="form-label">Desktop Image URL</label>
+                <input type="text" name="image_url" id="imageUrl" class="form-control" placeholder="https://example.com/desktop.jpg">
             </div>
 
-            <div style="text-align:center;color:var(--wf);font-size:.78rem;margin:4px 0">— or —</div>
+            <hr class="form-divider">
 
+            {{-- MOBILE IMAGE --}}
+            <div style="font-family:Cinzel,serif;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--wf);margin-bottom:8px;display:flex;align-items:center;gap:8px">
+                <svg style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                Mobile Image <span style="color:rgba(212,160,23,.7);border:1px solid rgba(212,160,23,.2);padding:1px 8px;border-radius:2px;font-size:.5rem">Optional · Recommended: 750 × 1000 px</span>
+            </div>
+            <div class="preview-box" id="mobilePreviewBox" style="height:200px">
+                <img id="mobileImgPreview" src="" alt="Mobile Preview">
+                <span class="preview-placeholder" id="mobilePreviewPlaceholder">Mobile Preview (Portrait)</span>
+            </div>
             <div class="form-group">
-                <label class="form-label">Image URL</label>
-                <input type="text" name="image_url" id="imageUrl" class="form-control" placeholder="https://example.com/image.jpg">
-                <div class="form-hint">Use a direct image URL (e.g. from Unsplash).</div>
+                <label class="form-label">Upload Mobile Image</label>
+                <input type="file" name="mobile_image_file" id="mobileImageFile" class="form-control" accept="image/*">
+                <div class="form-hint">Max 5 MB · Portrait format (3:4 or 9:16) · Shown on phones ≤ 768 px</div>
+            </div>
+            <div style="text-align:center;color:var(--wf);font-size:.78rem;margin:4px 0">— or —</div>
+            <div class="form-group">
+                <label class="form-label">Mobile Image URL</label>
+                <input type="text" name="mobile_image_url" id="mobileImageUrl" class="form-control" placeholder="https://example.com/mobile.jpg">
+                <div class="form-hint">If not provided, desktop image is used on mobile.</div>
             </div>
 
             <hr class="form-divider">
@@ -166,30 +190,36 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 
 @push('scripts')
 <script>
-// Live image preview
-document.getElementById('imageFile').addEventListener('change', function () {
-    const file = this.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function (e) { showPreview(e.target.result); };
-    reader.readAsDataURL(file);
-    document.getElementById('imageUrl').value = ''; // clear URL field
-});
-
-document.getElementById('imageUrl').addEventListener('input', function () {
-    const url = this.value.trim();
-    if (url) showPreview(url);
-});
-
-function showPreview(src) {
-    const img = document.getElementById('imgPreview');
-    const placeholder = document.getElementById('previewPlaceholder');
-    img.src = src;
-    img.style.display = 'block';
-    placeholder.style.display = 'none';
+function setPreview(imgId, placeholderId, src) {
+    const img = document.getElementById(imgId);
+    const ph  = document.getElementById(placeholderId);
+    img.src = src; img.style.display = 'block'; ph.style.display = 'none';
 }
 
-// Active toggle
+// Desktop image
+document.getElementById('imageFile').addEventListener('change', function () {
+    if (!this.files[0]) return;
+    const r = new FileReader();
+    r.onload = e => setPreview('imgPreview', 'previewPlaceholder', e.target.result);
+    r.readAsDataURL(this.files[0]);
+    document.getElementById('imageUrl').value = '';
+});
+document.getElementById('imageUrl').addEventListener('input', function () {
+    if (this.value.trim()) setPreview('imgPreview', 'previewPlaceholder', this.value.trim());
+});
+
+// Mobile image
+document.getElementById('mobileImageFile').addEventListener('change', function () {
+    if (!this.files[0]) return;
+    const r = new FileReader();
+    r.onload = e => setPreview('mobileImgPreview', 'mobilePreviewPlaceholder', e.target.result);
+    r.readAsDataURL(this.files[0]);
+    document.getElementById('mobileImageUrl').value = '';
+});
+document.getElementById('mobileImageUrl').addEventListener('input', function () {
+    if (this.value.trim()) setPreview('mobileImgPreview', 'mobilePreviewPlaceholder', this.value.trim());
+});
+
 function toggleActive() {
     const track = document.getElementById('toggleTrack');
     const input = document.getElementById('isActiveInput');

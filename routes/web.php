@@ -26,15 +26,16 @@ Route::get('/', function () {
 
     if ($dbSlides->isNotEmpty()) {
         $slides = $dbSlides->map(fn($s) => [
-            'image'      => $s->image_url,
-            'badge'      => $s->badge      ?? '',
-            'headline'   => $s->headline   ?? '',
-            'highlight'  => $s->highlight  ?? '',
-            'sub'        => $s->sub        ?? '',
-            'btn1_label' => $s->btn1_label ?? 'Learn More',
-            'btn1_url'   => $s->btn1_url   ?? '/',
-            'btn2_label' => $s->btn2_label ?? 'Contact Us',
-            'btn2_url'   => $s->btn2_url   ?? '/contact',
+            'image'        => $s->image_url,
+            'mobile_image' => $s->mobile_image_url,
+            'badge'        => $s->badge      ?? '',
+            'headline'     => $s->headline   ?? '',
+            'highlight'    => $s->highlight  ?? '',
+            'sub'          => $s->sub        ?? '',
+            'btn1_label'   => $s->btn1_label ?? 'Learn More',
+            'btn1_url'     => $s->btn1_url   ?? '/',
+            'btn2_label'   => $s->btn2_label ?? 'Contact Us',
+            'btn2_url'     => $s->btn2_url   ?? '/contact',
         ])->toArray();
     } else {
         // Default fallback slides (used when no slides exist in DB yet)

@@ -9,6 +9,7 @@ class Slider extends Model
 {
     protected $fillable = [
         'image',
+        'mobile_image',
         'badge',
         'headline',
         'highlight',
@@ -26,16 +27,23 @@ class Slider extends Model
         'sort_order' => 'integer',
     ];
 
-    /**
-     * Returns a browser-safe image URL whether the image is a
-     * storage path ("images/sliders/xxx.jpg") or an external URL.
-     */
     public function getImageUrlAttribute(): string
     {
-        if (str_starts_with($this->image, 'http://') || str_starts_with($this->image, 'https://')) {
-            return $this->image;
+        return $this->resolveImageUrl($this->image);
+    }
+
+    public function getMobileImageUrlAttribute(): ?string
+    {
+        if (!$this->mobile_image) return null;
+        return $this->resolveImageUrl($this->mobile_image);
+    }
+
+    private function resolveImageUrl(string $path): string
+    {
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
         }
-        return url('storage/' . $this->image);
+        return url('storage/' . $path);
     }
 
     /** Only active slides, sorted by sort_order */

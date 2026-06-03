@@ -24,12 +24,17 @@
         <div class="slide {{ $index === 0 ? 'active' : '' }}"
              aria-hidden="{{ $index === 0 ? 'false' : 'true' }}">
 
-            <img
-                class="slide-bg"
-                src="{{ $slide['image'] }}"
-                alt="{{ $slide['badge'] }}"
-                loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
-            >
+            <picture>
+                @if(!empty($slide['mobile_image']))
+                <source media="(max-width: 768px)" srcset="{{ $slide['mobile_image'] }}">
+                @endif
+                <img
+                    class="slide-bg"
+                    src="{{ $slide['image'] }}"
+                    alt="{{ $slide['badge'] }}"
+                    loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+                >
+            </picture>
 
             <div class="slide-overlay"></div>
             <div class="slide-content">

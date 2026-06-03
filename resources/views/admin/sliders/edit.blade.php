@@ -74,26 +74,66 @@ textarea.form-control { resize: vertical; min-height: 80px; }
                 Slide Image
             </div>
 
+            {{-- DESKTOP IMAGE --}}
+            <div style="font-family:Cinzel,serif;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--wf);margin-bottom:8px;display:flex;align-items:center;gap:8px">
+                <svg style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                Desktop Image <span style="color:var(--gold);border:1px solid rgba(212,160,23,.35);padding:1px 8px;border-radius:2px;font-size:.5rem">1920 × 900 px</span>
+            </div>
             <div class="preview-box">
-                <img id="imgPreview" src="{{ $slider->image_url }}" alt="Current slide image"
-                     onerror="this.src=''; this.style.display='none'">
-                <span class="current-image-label">Current Image</span>
+                <img id="imgPreview" src="{{ $slider->image_url }}" alt="Desktop image" onerror="this.style.display='none'">
+                <span class="current-image-label">Current Desktop</span>
             </div>
-
             <div class="form-group">
-                <label class="form-label">Upload New Image</label>
+                <label class="form-label">Replace Desktop Image</label>
                 <input type="file" name="image_file" id="imageFile" class="form-control" accept="image/*">
-                <div class="form-hint">Leave blank to keep current image. Max 5 MB.</div>
+                <div class="form-hint">Leave blank to keep current. Max 5 MB.</div>
+            </div>
+            <div style="text-align:center;color:var(--wf);font-size:.78rem;margin:4px 0">— or change URL —</div>
+            <div class="form-group">
+                <label class="form-label">Desktop Image URL</label>
+                <input type="text" name="image_url" id="imageUrl" class="form-control"
+                       placeholder="https://example.com/desktop.jpg"
+                       value="{{ str_starts_with($slider->image, 'http') ? $slider->image : '' }}">
             </div>
 
-            <div style="text-align:center;color:var(--wf);font-size:.78rem;margin:4px 0">— or change URL —</div>
+            <hr class="form-divider">
 
+            {{-- MOBILE IMAGE --}}
+            <div style="font-family:Cinzel,serif;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--wf);margin-bottom:8px;display:flex;align-items:center;gap:8px">
+                <svg style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                Mobile Image <span style="color:rgba(212,160,23,.7);border:1px solid rgba(212,160,23,.2);padding:1px 8px;border-radius:2px;font-size:.5rem">Optional · 750 × 1000 px</span>
+            </div>
+            @if($slider->mobile_image_url)
+            <div class="preview-box" style="height:200px" id="mobilePreviewBox">
+                <img id="mobileImgPreview" src="{{ $slider->mobile_image_url }}" alt="Mobile image">
+                <span class="current-image-label">Current Mobile</span>
+            </div>
             <div class="form-group">
-                <label class="form-label">Image URL</label>
-                <input type="text" name="image_url" id="imageUrl" class="form-control"
-                       placeholder="https://example.com/image.jpg"
-                       value="{{ str_starts_with($slider->image, 'http') ? $slider->image : '' }}">
-                <div class="form-hint">Leave blank to keep current. File upload takes priority.</div>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.82rem;color:var(--wf)">
+                    <input type="checkbox" name="remove_mobile" value="1" onchange="toggleMobileRemove(this)">
+                    Remove current mobile image (use desktop on all screens)
+                </label>
+            </div>
+            @else
+            <div class="preview-box" style="height:160px" id="mobilePreviewBox">
+                <img id="mobileImgPreview" src="" alt="Mobile Preview" style="display:none">
+                <span class="preview-placeholder" id="mobilePreviewPlaceholder">No Mobile Image Set</span>
+            </div>
+            @endif
+            <div id="mobileUploadWrap">
+                <div class="form-group">
+                    <label class="form-label">Upload Mobile Image</label>
+                    <input type="file" name="mobile_image_file" id="mobileImageFile" class="form-control" accept="image/*">
+                    <div class="form-hint">Portrait format · Max 5 MB · Shown on phones ≤ 768 px</div>
+                </div>
+                <div style="text-align:center;color:var(--wf);font-size:.78rem;margin:4px 0">— or —</div>
+                <div class="form-group">
+                    <label class="form-label">Mobile Image URL</label>
+                    <input type="text" name="mobile_image_url" id="mobileImageUrl" class="form-control"
+                           placeholder="https://example.com/mobile.jpg"
+                           value="{{ $slider->mobile_image && str_starts_with($slider->mobile_image, 'http') ? $slider->mobile_image : '' }}">
+                    <div class="form-hint">If not provided, desktop image is used on mobile.</div>
+                </div>
             </div>
 
             <hr class="form-divider">
@@ -191,30 +231,49 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 
 @push('scripts')
 <script>
-// Live preview on file select
+function setPreview(imgId, src, placeholderId) {
+    const img = document.getElementById(imgId);
+    if (!img) return;
+    img.src = src; img.style.display = 'block';
+    if (placeholderId) { const ph = document.getElementById(placeholderId); if(ph) ph.style.display='none'; }
+}
+
+// Desktop image
 document.getElementById('imageFile').addEventListener('change', function () {
-    const file = this.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        const img = document.getElementById('imgPreview');
-        img.src = e.target.result;
-        img.style.display = 'block';
-    };
-    reader.readAsDataURL(file);
+    if (!this.files[0]) return;
+    const r = new FileReader();
+    r.onload = e => setPreview('imgPreview', e.target.result);
+    r.readAsDataURL(this.files[0]);
     document.getElementById('imageUrl').value = '';
 });
-
 document.getElementById('imageUrl').addEventListener('input', function () {
-    const url = this.value.trim();
-    if (url) {
-        const img = document.getElementById('imgPreview');
-        img.src = url;
-        img.style.display = 'block';
-    }
+    if (this.value.trim()) setPreview('imgPreview', this.value.trim());
 });
 
-// Toggle active
+// Mobile image
+const mobileFileEl = document.getElementById('mobileImageFile');
+const mobileUrlEl  = document.getElementById('mobileImageUrl');
+if (mobileFileEl) {
+    mobileFileEl.addEventListener('change', function () {
+        if (!this.files[0]) return;
+        const r = new FileReader();
+        r.onload = e => setPreview('mobileImgPreview', e.target.result, 'mobilePreviewPlaceholder');
+        r.readAsDataURL(this.files[0]);
+        if (mobileUrlEl) mobileUrlEl.value = '';
+    });
+}
+if (mobileUrlEl) {
+    mobileUrlEl.addEventListener('input', function () {
+        if (this.value.trim()) setPreview('mobileImgPreview', this.value.trim(), 'mobilePreviewPlaceholder');
+    });
+}
+
+function toggleMobileRemove(checkbox) {
+    const wrap = document.getElementById('mobileUploadWrap');
+    if (wrap) wrap.style.opacity = checkbox.checked ? '0.35' : '1';
+    wrap.style.pointerEvents = checkbox.checked ? 'none' : '';
+}
+
 function toggleActive() {
     const track = document.getElementById('toggleTrack');
     const input = document.getElementById('isActiveInput');
