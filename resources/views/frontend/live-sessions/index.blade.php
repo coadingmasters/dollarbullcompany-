@@ -44,6 +44,23 @@
     .ls-view-link:hover { text-decoration: underline; }
     @keyframes fadeIn { from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)} }
     .ls-action-animated { animation: fadeIn .35s ease forwards; }
+
+    /* ── Quick enroll modal ── */
+    .qe-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9999;align-items:center;justify-content:center; }
+    .qe-overlay.show { display:flex; }
+    .qe-box { background:#111;border:1px solid rgba(201,168,76,.35);padding:32px 28px;width:100%;max-width:380px;animation:fadeIn .25s ease; }
+    .qe-title { font-family:Cinzel,serif;font-size:1rem;color:#fff;margin-bottom:6px;letter-spacing:.04em; }
+    .qe-sub { font-size:.82rem;color:var(--muted);margin-bottom:22px;line-height:1.55; }
+    .qe-label { display:block;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px; }
+    .qe-input { width:100%;padding:10px 12px;margin-bottom:14px;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:.88rem;outline:none;transition:border-color .2s; }
+    .qe-input:focus { border-color:var(--gold); }
+    .qe-submit { width:100%;padding:12px;background:transparent;border:1px solid var(--gold);color:var(--gold-light);font-family:Cinzel,serif;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:background .25s,color .25s;margin-bottom:10px; }
+    .qe-submit:hover { background:var(--gold);color:#0d0d0d; }
+    .qe-submit:disabled { opacity:.5;cursor:default; }
+    .qe-cancel { display:block;text-align:center;font-size:.78rem;color:var(--muted);cursor:pointer;background:none;border:none;font-family:inherit;width:100%;padding:4px; }
+    .qe-cancel:hover { color:var(--text); }
+    .qe-error { font-size:.8rem;color:#e07b73;margin-bottom:10px;display:none; }
+    .qe-success { font-size:.82rem;color:#7dcea0;text-align:center;padding:14px 0;display:none; }
 </style>
 @endpush
 
@@ -96,17 +113,17 @@
                                 <span class="ls-live-dot"></span> Join Now
                             </a>
                         @elseif($enrollment && $enrollment->isApproved() && $session->isScheduled())
-                            <span class="ls-pill ls-pill-approved">Approved — Waiting for session to start</span>
+                            <span class="ls-pill ls-pill-approved">✓ Approved — Waiting for session to start</span>
                         @elseif($enrollment && $enrollment->isPending())
                             <span class="ls-pill ls-pill-pending" data-pending="{{ $session->id }}">⏳ Pending Approval</span>
                         @elseif($enrollment && $enrollment->isRejected())
                             <span class="ls-pill ls-pill-rejected">Enrollment Rejected</span>
-                        @elseif($session->isLive())
-                            <a href="{{ route('live-sessions.register', $session->id) }}" class="btn ls-btn-live">
-                                <span class="ls-live-dot"></span> Register &amp; Join
-                            </a>
                         @else
-                            <a href="{{ route('live-sessions.register', $session->id) }}" class="btn">Register Now</a>
+                            <button class="btn {{ $session->isLive() ? 'ls-btn-live' : '' }}"
+                                    onclick="openEnroll({{ $session->id }}, '{{ e($session->title) }}', {{ $session->isLive() ? 'true' : 'false' }})">
+                                @if($session->isLive())<span class="ls-live-dot"></span>@endif
+                                {{ $session->isLive() ? 'Join Now' : 'Enroll Now' }}
+                            </button>
                         @endif
                     </div>
 
@@ -122,10 +139,108 @@
     </div>
 
 </div>
+
+{{-- Quick Enroll Modal --}}
+<div class="qe-overlay" id="qeOverlay" onclick="if(event.target===this)closeEnroll()">
+    <div class="qe-box">
+        <h3 class="qe-title" id="qeTitle">Request to Join</h3>
+        <p class="qe-sub">Enter your name and email. The host will approve your request instantly.</p>
+        <div class="qe-error" id="qeError"></div>
+        <div class="qe-success" id="qeSuccess">✓ Request sent! Waiting for host approval...</div>
+        <div id="qeFormWrap">
+            <label class="qe-label">Your Name</label>
+            <input type="text" id="qeName" class="qe-input" placeholder="Full name" autocomplete="name">
+            <label class="qe-label">Email Address</label>
+            <input type="email" id="qeEmail" class="qe-input" placeholder="your@email.com" autocomplete="email">
+            <button class="qe-submit" id="qeSubmit" onclick="submitEnroll()">Send Join Request</button>
+            <button class="qe-cancel" onclick="closeEnroll()">Cancel</button>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+<script>
+// ── Quick Enroll Modal ────────────────────────────────────
+let qeSessionId   = null;
+let qeSessionLive = false;
+const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+window.openEnroll = function(sessionId, title, isLive) {
+    qeSessionId   = sessionId;
+    qeSessionLive = isLive;
+    document.getElementById('qeTitle').textContent = 'Request to Join — ' + title;
+    document.getElementById('qeError').style.display   = 'none';
+    document.getElementById('qeSuccess').style.display = 'none';
+    document.getElementById('qeFormWrap').style.display = 'block';
+    document.getElementById('qeName').value  = '';
+    document.getElementById('qeEmail').value = '';
+    document.getElementById('qeSubmit').disabled = false;
+    document.getElementById('qeSubmit').textContent = 'Send Join Request';
+    document.getElementById('qeOverlay').classList.add('show');
+    setTimeout(function(){ document.getElementById('qeName').focus(); }, 100);
+};
+
+window.closeEnroll = function() {
+    document.getElementById('qeOverlay').classList.remove('show');
+};
+
+window.submitEnroll = async function() {
+    const name  = document.getElementById('qeName').value.trim();
+    const email = document.getElementById('qeEmail').value.trim();
+    const errEl = document.getElementById('qeError');
+    errEl.style.display = 'none';
+
+    if (!name)  { errEl.textContent = 'Please enter your name.';  errEl.style.display='block'; return; }
+    if (!email) { errEl.textContent = 'Please enter your email.'; errEl.style.display='block'; return; }
+
+    const btn = document.getElementById('qeSubmit');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    try {
+        const res  = await fetch('/live-sessions/' + qeSessionId + '/guest-enroll', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+            body: JSON.stringify({ name, email }),
+        });
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+            errEl.textContent = data.message || 'Something went wrong. Try again.';
+            errEl.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = 'Send Join Request';
+            return;
+        }
+
+        // Success — show confirmation in modal then close
+        document.getElementById('qeFormWrap').style.display = 'none';
+        document.getElementById('qeSuccess').style.display = 'block';
+
+        // Update the card action to "Pending Approval"
+        const actionsEl = document.querySelector('[data-actions="' + qeSessionId + '"]');
+        if (actionsEl) {
+            actionsEl.innerHTML =
+                '<span class="ls-pill ls-pill-pending ls-action-animated" data-pending="' + qeSessionId + '">⏳ Pending Approval</span>';
+        }
+
+        setTimeout(closeEnroll, 2200);
+
+    } catch (err) {
+        errEl.textContent = 'Network error. Please try again.';
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Send Join Request';
+    }
+};
+
+// Allow Enter key in modal inputs
+document.getElementById('qeName').addEventListener('keydown',  function(e){ if(e.key==='Enter') document.getElementById('qeEmail').focus(); });
+document.getElementById('qeEmail').addEventListener('keydown', function(e){ if(e.key==='Enter') submitEnroll(); });
+</script>
 <script>
 (function () {
     const PUSHER_KEY   = @json(config('broadcasting.connections.pusher.key'));

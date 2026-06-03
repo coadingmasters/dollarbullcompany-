@@ -231,6 +231,7 @@ Route::get('/blog/{blog:slug}', [BlogController::class, 'show'])->name('blog.sho
 // Frontend Live Session Routes — public (no auth required)
 Route::prefix('live-sessions')->name('live-sessions.')->group(function () {
     Route::get('/', [FrontendLiveSessionController::class, 'index'])->name('index');
+    Route::post('/{id}/guest-enroll', [FrontendLiveSessionController::class, 'guestEnroll'])->name('guest-enroll');
     Route::get('/{id}/register', [FrontendLiveSessionController::class, 'showRegister'])->name('register');
     Route::post('/{id}/register', [FrontendLiveSessionController::class, 'register'])->name('register.store');
     Route::get('/{id}/register/success', [FrontendLiveSessionController::class, 'registerSuccess'])->name('register.success');

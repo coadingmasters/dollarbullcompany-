@@ -11,6 +11,7 @@ use App\Services\AgoraTokenService;
 use App\Support\LiveSessionIdentity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class LiveSessionController extends Controller
 {
@@ -92,6 +93,49 @@ class LiveSessionController extends Controller
     {
         $session = LiveSession::findOrFail($id);
         return view('frontend.live-sessions.register-success', compact('session'));
+    }
+
+    public function guestEnroll(Request $request, $id)
+    {
+        $session = LiveSession::findOrFail($id);
+
+        $data = $request->validate([
+            'name'  => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+        ]);
+
+        // Prevent duplicate enrollments by email
+        if (LiveSessionEnrollment::where('live_session_id', $id)->where('email', $data['email'])->exists()) {
+            return response()->json(['ok' => false, 'message' => 'You have already requested to join this session.'], 422);
+        }
+
+        // Find or create a student record
+        $student = Student::firstOrCreate(
+            ['email' => $data['email']],
+            ['name' => $data['name'], 'password' => Hash::make(Str::random(16))]
+        );
+        if ($student->name !== $data['name']) {
+            $student->update(['name' => $data['name']]);
+        }
+
+        $userId = LiveSessionIdentity::userIdForStudent($student);
+
+        $enrollment = LiveSessionEnrollment::create([
+            'live_session_id' => $session->id,
+            'user_id'         => $userId,
+            'status'          => 'pending',
+            'enrolled_at'     => now(),
+            'first_name'      => $data['name'],
+            'email'           => $data['email'],
+        ]);
+
+        try {
+            event(new NewLiveSessionEnrollment($enrollment));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('NewLiveSessionEnrollment broadcast failed: ' . $e->getMessage());
+        }
+
+        return response()->json(['ok' => true, 'enrollment_id' => $enrollment->id]);
     }
 
     public function index()
