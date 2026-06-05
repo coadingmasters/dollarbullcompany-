@@ -50,12 +50,6 @@
 
                 <p class="slide-sub">{{ $slide['sub'] }}</p>
 
-                <div class="slide-ctas">
-                    <a href="{{ $slide['btn1_url'] }}" class="btn-primary">
-                        {{ $slide['btn1_label'] }}
-                        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </a>
-                </div>
             </div>
 
             {{-- Decorative large number --}}
@@ -73,20 +67,7 @@
         <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </button>
 
-    {{-- Dots --}}
-    <div class="slider-dots" role="tablist" aria-label="Slide navigation">
-        @foreach($slides as $index => $slide)
-        <button
-            class="dot {{ $index === 0 ? 'active' : '' }}"
-            role="tab"
-            aria-selected="{{ $index === 0 ? 'true' : 'false' }}"
-            aria-label="Slide {{ $index + 1 }}"
-            data-index="{{ $index }}">
-        </button>
-        @endforeach
-    </div>
-
-    {{-- Progress bar --}}
+{{-- Progress bar --}}
     <div class="slide-progress" id="slideProgress"></div>
 
 </section>
