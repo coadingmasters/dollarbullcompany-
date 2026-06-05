@@ -91,7 +91,7 @@
 
     <header class="hd">
         <div class="tag">📚 Paid Courses</div>
-        <h1>Master <em>Crypto</em> Trading</h1>
+        <h1>Master Trading</h1>
         <p class="subtitle">Browse all available courses. Click <strong>View course</strong> to watch lesson videos for courses you're approved for.</p>
     </header>
 
@@ -120,7 +120,7 @@
 
     <header class="hd">
         <div class="tag">📚 Paid Courses</div>
-        <h1>Master <em>Crypto</em> Trading</h1>
+        <h1>Master Trading</h1>
         <p class="subtitle">Browse all available courses and enroll in the one that's right for you.</p>
     </header>
 

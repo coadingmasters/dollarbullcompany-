@@ -55,9 +55,6 @@
                         {{ $slide['btn1_label'] }}
                         <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </a>
-                    <a href="{{ $slide['btn2_url'] }}" class="btn-outline">
-                        {{ $slide['btn2_label'] }}
-                    </a>
                 </div>
             </div>
 
