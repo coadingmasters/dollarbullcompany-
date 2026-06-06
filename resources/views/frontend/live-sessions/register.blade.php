@@ -164,8 +164,8 @@
         </div>
 
         <div class="field" style="margin-bottom:14px">
-          <label>CICNI <span class="req">*</span></label>
-          <input type="text" name="cicni" placeholder="Enter your CICNI" value="{{ old('cicni') }}" required>
+          <label>CNIC <span class="req">*</span></label>
+          <input type="text" name="cicni" placeholder="Enter your CNIC" value="{{ old('cicni') }}" required>
           @error('cicni')<span class="error-text">{{ $message }}</span>@enderror
         </div>
 

@@ -379,7 +379,7 @@ body{background:var(--black);color:var(--wd);font-family:'Crimson Pro',Georgia,s
                 <div class="story-points">
                     <div class="story-point">
                         <div class="sp-icon">✦</div>
-                        <div><div class="sp-title">Our Mission</div><div class="sp-text">To democratise crypto wealth by equipping every member with knowledge, signals, and a thriving peer community.</div></div>
+                        <div><div class="sp-title">Our Mission</div><div class="sp-text">To democratise forex wealth by equipping every member with knowledge, signals, and a thriving peer community.</div></div>
                     </div>
                     <div class="story-point">
                         <div class="sp-icon">◈</div>
@@ -400,7 +400,7 @@ body{background:var(--black);color:var(--wd);font-family:'Crimson Pro',Georgia,s
     <div class="stats-band-inner">
         <div class="sb-item fu"><span class="sb-val">320K+</span><span class="sb-lbl">Active Members</span></div>
         <div class="sb-item fu fu-d1"><span class="sb-val">$4.2B+</span><span class="sb-lbl">Trading Volume</span></div>
-        <div class="sb-item fu fu-d2"><span class="sb-val">180+</span><span class="sb-lbl">Crypto Assets</span></div>
+        <div class="sb-item fu fu-d2"><span class="sb-val">180+</span><span class="sb-lbl">Forex Assets</span></div>
         <div class="sb-item fu fu-d3"><span class="sb-val">60+</span><span class="sb-lbl">Countries</span></div>
     </div>
 </div>
@@ -512,7 +512,7 @@ body{background:var(--black);color:var(--wd);font-family:'Crimson Pro',Georgia,s
             $values = [
                 ['icon'=>'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>','title'=>'Trust & Transparency','text'=>'Every signal, every call, every result is published publicly. We hold ourselves accountable to the community — always.','d'=>0],
                 ['icon'=>'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>','title'=>'Speed & Accuracy','text'=>'Markets move fast. Our team operates 24/7 to deliver real-time signals and analysis before opportunities disappear.','d'=>1],
-                ['icon'=>'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>','title'=>'Community First','text'=>'CryptoOnly is built on peer power. 320,000 members share insights, hold each other accountable, and grow together.','d'=>2],
+                ['icon'=>'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>','title'=>'Community First','text'=>'Dollar Bull University is built on peer power. 320,000 members share insights, hold each other accountable, and grow together.','d'=>2],
                 ['icon'=>'<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3.33 1.67 8.67 1.67 12 0v-5"/>','title'=>'Education Over Hype','text'=>'We teach principles, not trends. Our structured curriculum is designed to make you independently profitable — not dependent on us.','d'=>0],
                 ['icon'=>'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>','title'=>'Real Returns','text'=>'Everything we do is measured by one metric: member profitability. No vanity stats — just verified results that speak for themselves.','d'=>1],
                 ['icon'=>'<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>','title'=>'Security & Privacy','text'=>'Your data and funds are protected by enterprise-grade security. We never sell member data — your privacy is a fundamental right.','d'=>2],
@@ -545,7 +545,7 @@ body{background:var(--black);color:var(--wd);font-family:'Crimson Pro',Georgia,s
                 ['year'=>'2021','title'=>'P2P Platform Launch','desc'=>'Launched our escrow-secured P2P trading platform. Processed over $200M in trades in the first year.'],
                 ['year'=>'2022','title'=>'Live Sessions & $1B Volume','desc'=>'Introduced weekly live trading sessions with our analyst team. Community trading volume crossed $1B.'],
                 ['year'=>'2023','title'=>'Global Expansion','desc'=>'Expanded to 60+ countries, launched in Arabic & Urdu, onboarded 5 new senior analysts.'],
-                ['year'=>'2024','title'=>'320K Members & $4.2B Volume','desc'=>'Became one of the largest crypto education and trading communities in the world. Still growing.'],
+                ['year'=>'2024','title'=>'320K Members & $4.2B Volume','desc'=>'Became one of the largest forex education and trading communities in the world. Still growing.'],
             ];
             @endphp
             @foreach($milestones as $m)

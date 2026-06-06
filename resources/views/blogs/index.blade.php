@@ -274,7 +274,7 @@
     <div class="blog-hero-content">
         <div class="blog-hero-eyebrow">Insights & Analysis</div>
         <h1 class="blog-hero-title">The <span>Knowledge</span> Vault</h1>
-        <p class="blog-hero-sub">Deep dives on crypto, finance and technology — written for those who think differently.</p>
+        <p class="blog-hero-sub">Deep dives on forex, finance and technology — written for those who think differently.</p>
     </div>
 </section>
 

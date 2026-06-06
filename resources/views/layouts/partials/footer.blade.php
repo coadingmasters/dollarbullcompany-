@@ -461,7 +461,7 @@
                     Stay Ahead of the Market
                 </div>
                 <h3 class="fn-title">
-                    Get Free <span>Crypto Signals</span><br>
+                    Get Free <span>Forex Signals</span><br>
                     Delivered to Your Inbox
                 </h3>
             </div>
@@ -499,7 +499,7 @@
             </a>
 
             <p class="fb-desc">
-                Your all-in-one platform for crypto intelligence, education, and peer-to-peer trading. Trusted by 320,000+ traders worldwide since 2019.
+                Your all-in-one platform for forex intelligence, education, and peer-to-peer trading. Trusted by 320,000+ traders worldwide since 2019.
             </p>
 
             {{-- Social links --}}
@@ -540,7 +540,7 @@
                 <li><a href="{{ url('/courses') }}">Paid Courses</a></li>
                 <li><a href="{{ url('/live-sessions') }}">Live Sessions</a></li>
                 <li><a href="{{ url('/p2p') }}">P2P Trading</a></li>
-                <li><a href="{{ url('/signals') }}">Crypto Signals</a></li>
+                <li><a href="{{ url('/signals') }}">Forex Signals</a></li>
                 <li><a href="{{ url('/portfolio') }}">Portfolio Tracker</a></li>
                 <li><a href="{{ url('/markets') }}">Live Markets</a></li>
             </ul>

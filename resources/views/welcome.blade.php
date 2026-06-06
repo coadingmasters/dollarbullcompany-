@@ -90,7 +90,7 @@
         <div class="stat-divider"></div>
         <div class="stat-item">
             <div class="stat-value">180+</div>
-            <div class="stat-label">Crypto Assets</div>
+            <div class="stat-label">Forex Assets</div>
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
@@ -125,7 +125,7 @@
             </div>
             <h2 class="section-title">
                 Everything You Need to<br>
-                <span>Master Crypto</span>
+                <span>Master Forex</span>
             </h2>
             <p class="section-desc">
                 From exclusive insider groups to live expert sessions — we provide every tool you need to thrive in the digital asset space.
@@ -157,7 +157,7 @@
                     <span class="card-tag">Exclusive Access</span>
                     <h3 class="card-title">Premium Group</h3>
                     <p class="card-desc">
-                        Join our elite private community of serious crypto investors. Get insider signals, whale alerts, and curated alpha before the market moves.
+                        Join our elite private community of serious forex investors. Get insider signals, whale alerts, and curated alpha before the market moves.
                     </p>
                     <a href="{{ url('/premium-group') }}" class="card-btn">
                         <span class="btn-fill"></span>
@@ -204,7 +204,7 @@
                     <span class="card-tag">Learn & Earn</span>
                     <h3 class="card-title">Paid Courses</h3>
                     <p class="card-desc">
-                        Structured crypto courses from beginner to advanced. Master technical analysis, DeFi strategies, and portfolio management with certified instructors.
+                        Structured forex courses from beginner to advanced. Master technical analysis, DeFi strategies, and portfolio management with certified instructors.
                     </p>
                     <a href="{{ url('/courses') }}" class="card-btn">
                         <span class="btn-fill"></span>
@@ -381,7 +381,7 @@
                     <div class="about-point-icon">✦</div>
                     <div class="about-point-body">
                         <div class="about-point-title">Our Mission</div>
-                        <div class="about-point-text">To democratise crypto wealth by equipping every member with knowledge, signals, and a thriving peer community.</div>
+                        <div class="about-point-text">To democratise forex wealth by equipping every member with knowledge, signals, and a thriving peer community.</div>
                     </div>
                 </div>
                 <div class="about-point">
