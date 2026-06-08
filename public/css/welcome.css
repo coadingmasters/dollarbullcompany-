@@ -493,6 +493,11 @@
     gap: 24px;
 }
 
+@keyframes card-rise {
+    from { opacity: 0; transform: translateY(52px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ── Single Card ── */
 .service-card {
     position: relative;
@@ -501,18 +506,9 @@
     background: var(--black-card);
     border: 1px solid var(--black-border);
     cursor: pointer;
-    /* Entrance — staggered via CSS var --ci */
-    opacity: 0;
-    transform: translateY(52px);
-    transition:
-        opacity    0.75s ease            calc(var(--ci, 0) * 0.13s),
-        transform  0.75s var(--ease-out) calc(var(--ci, 0) * 0.13s),
-        border-color 0.4s ease,
-        box-shadow   0.4s ease;
-}
-.service-card.in-view {
-    opacity: 1;
-    transform: translateY(0);
+    animation: card-rise 0.75s var(--ease-out) both;
+    animation-delay: calc(var(--ci, 0) * 0.13s + 0.2s);
+    transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.3s var(--ease-out);
 }
 .service-card:hover {
     border-color: rgba(212,160,23,0.5);
