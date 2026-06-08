@@ -19,14 +19,12 @@
         idx = ((idx % total) + total) % total;
         slides[current].classList.remove('active');
         slides[current].setAttribute('aria-hidden', 'true');
-        dots[current].classList.remove('active');
-        dots[current].setAttribute('aria-selected', 'false');
+        if (dots[current]) { dots[current].classList.remove('active'); dots[current].setAttribute('aria-selected', 'false'); }
         current = idx;
         track.style.transform = 'translateX(-' + (current * 100) + '%)';
         slides[current].classList.add('active');
         slides[current].setAttribute('aria-hidden', 'false');
-        dots[current].classList.add('active');
-        dots[current].setAttribute('aria-selected', 'true');
+        if (dots[current]) { dots[current].classList.add('active'); dots[current].setAttribute('aria-selected', 'true'); }
         counterEl.textContent = String(current + 1).padStart(2, '0');
         progressEl.style.transition = 'none';
         progressEl.style.width = '0%';
@@ -43,11 +41,13 @@
     function stopAuto() { clearInterval(timer); }
     prevBtn.addEventListener('click', function () { goTo(current - 1); startAuto(); });
     nextBtn.addEventListener('click', function () { goTo(current + 1); startAuto(); });
-    dots.forEach(function (dot, i) {
-        dot.addEventListener('click', function () {
-            if (i !== current) { goTo(i); startAuto(); }
+    if (dots.length) {
+        dots.forEach(function (dot, i) {
+            dot.addEventListener('click', function () {
+                if (i !== current) { goTo(i); startAuto(); }
+            });
         });
-    });
+    }
     var touchX = 0;
     track.addEventListener('touchstart', function (e) {
         touchX = e.changedTouches[0].screenX;

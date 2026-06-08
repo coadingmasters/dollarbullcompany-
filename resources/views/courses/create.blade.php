@@ -58,12 +58,12 @@
         <div class="form-row">
             <div class="form-group">
                 <label>Title <span class="req">*</span></label>
-                <input type="text" name="title" value="{{ old('title') }}" required>
+                <input type="text" name="title" id="courseTitle" value="{{ old('title') }}" required>
             </div>
             <div class="form-group">
                 <label>Slug <span class="req">*</span></label>
-                <input type="text" name="slug" value="{{ old('slug') }}" required>
-                <div class="help-text">URL-friendly version of title (auto-slugified)</div>
+                <input type="text" name="slug" id="courseSlug" value="{{ old('slug') }}" required>
+                <div class="help-text">Auto-generated from title — you can edit it manually</div>
             </div>
         </div>
 
@@ -122,3 +122,29 @@
     </form>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    const titleEl = document.getElementById('courseTitle');
+    const slugEl  = document.getElementById('courseSlug');
+    let userEditedSlug = false;
+
+    function toSlug(str) {
+        return str.toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .trim()
+            .replace(/[\s]+/g, '-')
+            .replace(/-+/g, '-');
+    }
+
+    slugEl.addEventListener('input', () => { userEditedSlug = slugEl.value.length > 0; });
+
+    titleEl.addEventListener('input', function () {
+        if (!userEditedSlug) {
+            slugEl.value = toSlug(this.value);
+        }
+    });
+})();
+</script>
+@endpush
