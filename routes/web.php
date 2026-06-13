@@ -124,10 +124,12 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::get('/enrollments', [EnrollmentController::class, 'adminIndex'])->name('enrollments.admin');
     Route::patch('/enrollments/{enrollment}/verify', [EnrollmentController::class, 'verify'])->name('enrollments.verify');
     Route::patch('/enrollments/{enrollment}/reject', [EnrollmentController::class, 'reject'])->name('enrollments.reject');
+    Route::delete('/enrollments/{enrollment}', [EnrollmentController::class, 'destroy'])->name('enrollments.destroy');
 
     Route::get('/course-enrollments', [CourseEnrollmentController::class, 'adminIndex'])->name('course-enrollments.admin');
     Route::patch('/course-enrollments/{courseEnrollment}/verify', [CourseEnrollmentController::class, 'verify'])->name('course-enrollments.verify');
     Route::patch('/course-enrollments/{courseEnrollment}/reject', [CourseEnrollmentController::class, 'reject'])->name('course-enrollments.reject');
+    Route::delete('/course-enrollments/{courseEnrollment}', [CourseEnrollmentController::class, 'destroy'])->name('course-enrollments.destroy');
 
     // Course Management
     Route::resource('courses', CourseController::class);

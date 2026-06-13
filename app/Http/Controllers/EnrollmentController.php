@@ -57,4 +57,10 @@ class EnrollmentController extends Controller
         $enrollment->update(['status' => 'rejected']);
         return back()->with('success', 'Enrollment rejected!');
     }
+
+    public function destroy(Enrollment $enrollment)
+    {
+        $enrollment->delete();
+        return back()->with('success', 'Enrollment deleted!');
+    }
 }

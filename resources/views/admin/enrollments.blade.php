@@ -355,6 +355,11 @@
                                                 <button type="submit" class="btn-small btn-reject">Reject</button>
                                             </form>
                                         @endif
+                                        <form method="POST" action="{{ route('enrollments.destroy', $enrollment) }}" style="display: inline;" onsubmit="return confirm('Delete this enrollment? This cannot be undone.')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn-small btn-reject">Delete</button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>

@@ -63,6 +63,13 @@ class CourseEnrollmentController extends Controller
         return back()->with('success', 'Student enrollment rejected!');
     }
 
+    public function destroy(CourseEnrollment $courseEnrollment)
+    {
+        $courseEnrollment->delete();
+
+        return back()->with('success', 'Enrollment deleted!');
+    }
+
     protected function persistEnrollment(CourseEnrollmentRequest $request, Course $course): void
     {
         $data = $request->validated();
