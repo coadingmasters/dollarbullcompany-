@@ -379,7 +379,7 @@
 
 @push('scripts')
     <script>
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const csrfToken = @json(csrf_token());
         const adminBase = @json(rtrim(url('/admin'), '/'));
 
         const enrollmentsData = {!! json_encode($enrollments->map(function ($e) {
