@@ -399,7 +399,7 @@
                 'payment_screenshot' => $e->payment_screenshot ? asset('storage/' . $e->payment_screenshot) : null,
                 'face_photo' => $e->face_photo ? asset('storage/' . $e->face_photo) : null,
             ];
-        })) !!};
+        })->values(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE) !!};
 
         function openModal(id) {
             const enrollment = enrollmentsData.find(e => e.id === id);
@@ -448,30 +448,44 @@
                 </div>
             `;
 
-            if (enrollment.face_photo || enrollment.payment_screenshot || enrollment.face_recognition) {
-                html += '<div class="modal-images">';
-                if (enrollment.face_photo) {
-                    html += `
-                        <div class="modal-img-box">
-                            <div class="info-label">Student face (capture)</div>
-                            <img src="${enrollment.face_photo}" alt="Student face">
-                        </div>`;
-                } else if (enrollment.face_recognition) {
-                    html += `
-                        <div class="modal-img-box">
-                            <div class="info-label">Face note (legacy)</div>
-                            <div class="info-value" style="padding:8px 0">${enrollment.face_recognition}</div>
-                        </div>`;
-                }
-                if (enrollment.payment_screenshot) {
-                    html += `
-                        <div class="modal-img-box">
-                            <div class="info-label">Payment proof</div>
-                            <img src="${enrollment.payment_screenshot}" alt="Payment proof">
-                        </div>`;
-                }
-                html += '</div>';
+            html += '<div class="modal-images">';
+            if (enrollment.face_photo) {
+                html += `
+                    <div class="modal-img-box">
+                        <div class="info-label">Student Face Photo</div>
+                        <img src="${enrollment.face_photo}" alt="Student face"
+                             onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                        <div style="display:none;padding:20px;text-align:center;color:var(--muted);border:1px dashed var(--border)">Image not available</div>
+                    </div>`;
+            } else if (enrollment.face_recognition) {
+                html += `
+                    <div class="modal-img-box">
+                        <div class="info-label">Face Note</div>
+                        <div class="info-value" style="padding:8px 0">${enrollment.face_recognition}</div>
+                    </div>`;
+            } else {
+                html += `
+                    <div class="modal-img-box">
+                        <div class="info-label">Student Face Photo</div>
+                        <div style="padding:20px;text-align:center;color:var(--muted);border:1px dashed var(--border)">Not uploaded</div>
+                    </div>`;
             }
+            if (enrollment.payment_screenshot) {
+                html += `
+                    <div class="modal-img-box">
+                        <div class="info-label">Payment Proof</div>
+                        <img src="${enrollment.payment_screenshot}" alt="Payment proof"
+                             onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                        <div style="display:none;padding:20px;text-align:center;color:var(--muted);border:1px dashed var(--border)">Image not available</div>
+                    </div>`;
+            } else {
+                html += `
+                    <div class="modal-img-box">
+                        <div class="info-label">Payment Proof</div>
+                        <div style="padding:20px;text-align:center;color:var(--muted);border:1px dashed var(--border)">Not uploaded</div>
+                    </div>`;
+            }
+            html += '</div>';
 
             html += '<div class="modal-actions">';
             if (st !== 'verified') {

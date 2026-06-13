@@ -8,3 +8,6 @@ echo "Tables Created! ✅ <br>";
 
 $kernel->call('db:seed', ['--class' => 'CategorySeeder', '--force' => true]);
 echo "Categories Added! ✅ <br>";
+
+$kernel->call('storage:link');
+echo "Storage linked! ✅ <br>";
