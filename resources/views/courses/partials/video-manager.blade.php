@@ -1,6 +1,7 @@
 @php
     $initUrl     = route('courses.videos.upload.init',     $course);
     $chunkUrl    = route('courses.videos.upload.chunk',    $course);
+    $statusUrl   = route('courses.videos.upload.status',   $course);
     $finalizeUrl = route('courses.videos.upload.finalize', $course);
 @endphp
 
@@ -147,15 +148,20 @@
 <script>
 (function () {
     // ── Config ────────────────────────────────────────────────
-    const CHUNK_SIZE   = 2 * 1024 * 1024;  // 2 MB per chunk
-    const CONCURRENCY  = 3;                 // parallel chunk uploads
-    const MAX_RETRIES  = 4;                 // retries per chunk (with backoff)
-    const RETRY_BASE   = 800;               // ms base delay, doubles each retry
+    const CHUNK_SIZE    = 2 * 1024 * 1024;  // 2 MB per chunk
+    const CONCURRENCY   = 2;                 // parallel chunk uploads (gentle on shared hosting)
+    const MAX_RETRIES   = 5;                 // retries per chunk within a pass (with backoff)
+    const RETRY_BASE    = 1000;              // ms base delay, doubles each retry
+    const RETRY_CAP     = 15000;             // max backoff between retries
+    const CHUNK_TIMEOUT = 120000;            // abort a single chunk request after 120s
+    const MAX_PASSES    = 6;                 // whole-file resume passes for stragglers
 
-    const INIT_URL  = @json($initUrl);
-    const CHUNK_URL = @json($chunkUrl);
-    const FINAL_URL = @json($finalizeUrl);
-    const CSRF      = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const INIT_URL   = @json($initUrl);
+    const CHUNK_URL  = @json($chunkUrl);
+    const STATUS_URL = @json($statusUrl);
+    const FINAL_URL  = @json($finalizeUrl);
+    const CSRF       = document.querySelector('meta[name="csrf-token"]')?.content
+                       || document.querySelector('input[name="_token"]')?.value || '';
 
     // ── State ─────────────────────────────────────────────────
     let selFile        = null;
@@ -264,7 +270,8 @@
             setBusy(false);
             hideProgress();
             if (err.message !== '__CANCELLED__') {
-                showError(err.message || 'Upload failed. Please try again.');
+                const msg = (err.message || 'Upload failed. Please try again.').replace('__FATAL__', '');
+                showError(msg);
             }
         }
     };
@@ -276,23 +283,66 @@
         hideProgress();
     };
 
-    // ── Parallel chunk uploader ───────────────────────────────
+    // ── Parallel chunk uploader with multi-pass resume ────────
+    // A single chunk that exhausts its retries is not fatal: we collect
+    // stragglers and re-send only those on the next pass, asking the server
+    // (status endpoint) which chunks it already has. This survives the
+    // intermittent "Failed to fetch" drops common on shared hosting.
     async function uploadAllChunks(uploadId, totalChunks) {
-        const queue          = Array.from({ length: totalChunks }, (_, i) => i);
-        const chunkBytes     = new Array(totalChunks).fill(0); // bytes per chunk index
-        let   nextChunkIndex = 0;
-        let   workerError    = null;
-
-        // Pre-compute each chunk's byte size for accurate progress
+        const chunkBytes = new Array(totalChunks).fill(0); // bytes per chunk index
         for (let i = 0; i < totalChunks; i++) {
-            const start     = i * CHUNK_SIZE;
-            chunkBytes[i]   = Math.min(CHUNK_SIZE, selFile.size - start);
+            chunkBytes[i] = Math.min(CHUNK_SIZE, selFile.size - i * CHUNK_SIZE);
         }
 
+        let pending = Array.from({ length: totalChunks }, (_, i) => i);
+
+        for (let pass = 0; pass < MAX_PASSES; pass++) {
+            if (aborted) throw new Error('__CANCELLED__');
+
+            // On resume passes, ask the server what it already received so we
+            // never re-upload chunks that actually made it through.
+            if (pass > 0) {
+                const received = await fetchReceived(uploadId);
+                if (received) {
+                    pending = pending.filter(i => !received.has(i));
+                    completedBytes = 0;
+                    for (let i = 0; i < totalChunks; i++) {
+                        if (received.has(i)) completedBytes += chunkBytes[i];
+                    }
+                }
+                if (pending.length === 0) break; // everything landed
+                showProgress(
+                    Math.min(90, Math.round((completedBytes / selFile.size) * 90)),
+                    'Reconnecting — resuming ' + pending.length + ' chunk(s)…'
+                );
+                await sleep(1500 + Math.random() * 2000); // let any throttle window clear
+            }
+
+            const failed = await runUploadPass(uploadId, pending, chunkBytes, totalChunks);
+
+            if (aborted) throw new Error('__CANCELLED__');
+            if (failed.length === 0) return; // all chunks delivered
+            pending = failed;
+        }
+
+        throw new Error(
+            pending.length + ' chunk(s) could not be uploaded after several attempts. ' +
+            'This is usually a temporary network drop or a server limit on your host — ' +
+            'please check your connection and click Upload Video to try again.'
+        );
+    }
+
+    // Run one pass over the given chunk indices; returns the indices that
+    // soft-failed (exhausted retries) so the caller can retry them.
+    async function runUploadPass(uploadId, indices, chunkBytes, totalChunks) {
+        const queue  = indices.slice();
+        const failed = [];
+        let   qi     = 0;
+
         function getNext() {
-            if (aborted || workerError) return null;
-            if (nextChunkIndex >= totalChunks) return null;
-            return nextChunkIndex++;
+            if (aborted) return null;
+            if (qi >= queue.length) return null;
+            return queue[qi++];
         }
 
         async function worker() {
@@ -300,7 +350,7 @@
                 const i = getNext();
                 if (i === null) break;
                 try {
-                    await uploadOneChunkWithRetry(uploadId, i, totalChunks);
+                    await uploadOneChunkWithRetry(uploadId, i);
                     completedBytes += chunkBytes[i];
                     const elapsed = Math.max((Date.now() - startedAt) / 1000, 0.01);
                     const speed   = completedBytes / elapsed;
@@ -309,25 +359,23 @@
                     const done    = Math.round((completedBytes / selFile.size) * totalChunks);
                     showProgress(pct, 'Uploading… (' + done + ' / ' + totalChunks + ' chunks)', speed, eta);
                 } catch (e) {
-                    workerError = e;
-                    break;
+                    if (e.message === '__CANCELLED__') throw e;
+                    if (e.message && e.message.indexOf('__FATAL__') === 0) throw e;
+                    failed.push(i); // transient — retry on the next pass
                 }
             }
         }
 
-        // Start N workers concurrently
-        const workers = Array.from({ length: Math.min(CONCURRENCY, totalChunks) }, worker);
+        const workers = Array.from({ length: Math.min(CONCURRENCY, queue.length) }, worker);
         await Promise.all(workers);
-
-        if (aborted) throw new Error('__CANCELLED__');
-        if (workerError) throw workerError;
+        return failed;
     }
 
-    // Upload one chunk, retrying on transient errors
-    async function uploadOneChunkWithRetry(uploadId, index, totalChunks) {
+    // Upload one chunk, retrying transient errors with capped back-off + jitter
+    // and a per-request timeout so a stalled socket is aborted (not left hanging).
+    async function uploadOneChunkWithRetry(uploadId, index) {
         const start = index * CHUNK_SIZE;
         const end   = Math.min(start + CHUNK_SIZE, selFile.size);
-        const blob  = selFile.slice(start, end);
 
         for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
             if (aborted) throw new Error('__CANCELLED__');
@@ -335,37 +383,59 @@
             const fd = new FormData();
             fd.append('upload_id',   uploadId);
             fd.append('chunk_index', index);
-            fd.append('chunk',       blob, 'chunk');
+            fd.append('chunk',       selFile.slice(start, end), 'chunk');
+
+            const ctrl  = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), CHUNK_TIMEOUT);
 
             try {
                 const res = await fetch(CHUNK_URL, {
                     method:  'POST',
                     headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
                     body:    fd,
+                    signal:  ctrl.signal,
                 });
+                clearTimeout(timer);
 
                 if (res.ok) return; // success
 
-                const body   = await res.json().catch(() => ({}));
-                const errMsg = body.error || ('Chunk ' + index + ' rejected by server (HTTP ' + res.status + ').');
-
-                // 4xx = client/session error — no point retrying
-                if (res.status >= 400 && res.status < 500) {
-                    throw new Error(errMsg + ' Please refresh the page and try again.');
+                // 4xx (except 408 timeout / 429 too-many-requests) = real client/
+                // session error — retrying won't help, so fail the whole upload.
+                if (res.status >= 400 && res.status < 500 && res.status !== 408 && res.status !== 429) {
+                    const body = await res.json().catch(() => ({}));
+                    throw new Error('__FATAL__' + (body.error || ('Chunk rejected by server (HTTP ' + res.status + ').'))
+                        + ' Please refresh the page and try again.');
                 }
-
-                // 5xx = server error — fall through to retry
-                if (attempt === MAX_RETRIES) throw new Error(errMsg);
-
-            } catch (fetchErr) {
-                if (fetchErr.message === '__CANCELLED__') throw fetchErr;
-                if (attempt === MAX_RETRIES) {
-                    throw new Error('Chunk ' + index + ' failed after ' + MAX_RETRIES + ' retries: ' + fetchErr.message);
-                }
+                // 408 / 429 / 5xx → fall through to retry
+            } catch (err) {
+                clearTimeout(timer);
+                if (aborted) throw new Error('__CANCELLED__');
+                if (err.message && err.message.indexOf('__FATAL__') === 0) throw err;
+                // network error / timeout / abort → retry
             }
 
-            // Exponential back-off: 800ms, 1.6s, 3.2s, 6.4s
-            await sleep(RETRY_BASE * Math.pow(2, attempt));
+            if (attempt === MAX_RETRIES) {
+                throw new Error('chunk ' + index + ' unreachable'); // soft-fail → next pass
+            }
+
+            // Exponential back-off with jitter, capped
+            const backoff = Math.min(RETRY_BASE * Math.pow(2, attempt), RETRY_CAP);
+            await sleep(backoff + Math.random() * 600);
+        }
+    }
+
+    // Ask the server which chunk indices it currently holds (for resume).
+    async function fetchReceived(uploadId) {
+        try {
+            const res = await fetch(STATUS_URL + '?upload_id=' + encodeURIComponent(uploadId), {
+                method:  'GET',
+                headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+            });
+            if (!res.ok) return null;
+            const body = await res.json();
+            return new Set(Array.isArray(body.received) ? body.received : []);
+        } catch (_) {
+            return null; // status check is best-effort
         }
     }
 
