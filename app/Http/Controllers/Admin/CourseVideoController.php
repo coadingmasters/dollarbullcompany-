@@ -58,7 +58,7 @@ class CourseVideoController extends Controller
 
     public function destroy(Request $request, Course $course, CourseVideo $video)
     {
-        abort_unless($video->course_id === $course->id, 404);
+        abort_unless((int) $video->course_id === (int) $course->id, 404);
 
         $video->delete();
 
