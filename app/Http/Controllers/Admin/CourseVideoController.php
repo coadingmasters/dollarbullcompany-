@@ -56,11 +56,15 @@ class CourseVideoController extends Controller
         return back()->with('success', 'Video uploaded successfully.');
     }
 
-    public function destroy(Course $course, CourseVideo $video)
+    public function destroy(Request $request, Course $course, CourseVideo $video)
     {
         abort_unless($video->course_id === $course->id, 404);
 
         $video->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Video removed.']);
+        }
 
         return back()->with('success', 'Video removed.');
     }

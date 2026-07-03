@@ -55,16 +55,65 @@
     function openDelModal(btn, title) {
         _delForm = btn.closest('form');
         document.getElementById('delModalTitle').textContent = '"' + title + '"';
-        const modal = document.getElementById('delModal');
-        modal.style.display = 'flex';
-        document.getElementById('delConfirmBtn').onclick = function () {
-            _delForm.submit();
-        };
+        document.getElementById('delModal').style.display = 'flex';
     }
     function closeDelModal() {
         document.getElementById('delModal').style.display = 'none';
         _delForm = null;
+        const c = document.getElementById('delConfirmBtn');
+        c.disabled = false;
+        c.textContent = 'Yes, Delete';
     }
+
+    // Delete the video via AJAX and remove its row in place — never navigate away.
+    document.getElementById('delConfirmBtn').addEventListener('click', function () {
+        if (!_delForm) return;
+
+        const form   = _delForm;
+        const btn    = this;
+        const action = form.getAttribute('action');
+        const token  = form.querySelector('input[name="_token"]')?.value
+                     || document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+        btn.disabled    = true;
+        btn.textContent = 'Deleting…';
+
+        fetch(action, {
+            method:  'POST',
+            headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
+            body:    new URLSearchParams({ _method: 'DELETE', _token: token }),
+        })
+        .then(function (res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+
+            const li   = form.closest('li');
+            const list = li ? li.parentElement : null;
+            if (li) li.remove();
+
+            // Renumber remaining videos so the list stays 1, 2, 3…
+            if (list) {
+                Array.prototype.forEach.call(list.children, function (item, idx) {
+                    const span = item.querySelector('span');
+                    if (span) span.textContent = span.textContent.replace(/^\s*\d+\.\s*/, (idx + 1) + '. ');
+                });
+                if (list.children.length === 0) {
+                    const p = document.createElement('p');
+                    p.id = 'noVideos';
+                    p.className = 'help-text';
+                    p.style.marginBottom = '14px';
+                    p.textContent = 'No videos yet.';
+                    list.replaceWith(p);
+                }
+            }
+            closeDelModal();
+        })
+        .catch(function () {
+            btn.disabled    = false;
+            btn.textContent = 'Yes, Delete';
+            alert('Could not delete the video. Please refresh the page and try again.');
+        });
+    });
+
     // Close on backdrop click
     document.getElementById('delModal').addEventListener('click', function(e) {
         if (e.target === this) closeDelModal();
