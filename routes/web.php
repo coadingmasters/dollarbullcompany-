@@ -91,6 +91,7 @@ Route::get('/', function () {
 });
 
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\AccountController;
 
 Route::get('/admin/login', [AuthController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AuthController::class, 'login'])->name('admin.login.submit');
@@ -100,6 +101,10 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.Dashboard');
     })->name('admin.dashboard');
+
+    // Admin account & password
+    Route::get('/account', [AccountController::class, 'edit'])->name('admin.account.edit');
+    Route::patch('/account', [AccountController::class, 'update'])->name('admin.account.update');
 
     Route::get('/premium-group', function () {
         return redirect()->route('enrollments.admin');
