@@ -591,7 +591,7 @@
     <div class="div"><span></span><span style="color:var(--gold);font-size:8px">◆</span><span></span></div>
     <div class="grid">
       <div class="panel" style="padding:0;overflow:hidden;display:flex;align-items:stretch">
-        <img src="{{ asset('imagess/dollarbullpayment.jpeg') }}"
+        <img src="{{ asset('storage/img/dollarbullpayment.jpeg') }}"
              alt="Payment Details"
              style="width:100%;height:auto;display:block;object-fit:cover;max-height:600px">
       </div>
