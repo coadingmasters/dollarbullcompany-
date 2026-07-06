@@ -590,27 +590,10 @@
     </header>
     <div class="div"><span></span><span style="color:var(--gold);font-size:8px">◆</span><span></span></div>
     <div class="grid">
-      <div class="panel">
-        <div class="ptitle">Payment Details</div>
-        <p class="proc">Pay ${{ number_format($course->price, 0) }} in favour of <strong style="color:var(--text)">Trade Campus</strong> and attach payment
-          proof. Team contacts you within <strong style="color:var(--gold)">48 hours</strong> via email or WhatsApp.</p>
-        <div class="bb">
-          <div class="bname">🏦 Meezan Bank — Tulsa Road</div>
-          <div class="br"><span class="lb">IBAN</span><span>PK88MEZN0008230109103971</span></div>
-          <div class="br"><span class="lb">Title</span><span>BADAR TANVIR ENTERPRISES (SMC-PRIVATE) LTD</span></div>
-          <div class="br"><span class="lb">SWIFT</span><span>MEZNPKKA</span></div>
-        </div>
-        <div class="bb">
-          <div class="bname">🔶 Binance Pay</div>
-          <div class="br"><span class="lb">Pay ID</span><span>81442671</span></div>
-          <div class="br"><span class="lb">TRC20</span><span
-              style="font-size:.72rem">TX9cFkKCu3hLfmoLnAkuZtBX5MqHiSb6oh</span></div>
-        </div>
-        <div class="notice">
-          <p>⚠ After payment, wait <strong>48 hours</strong> for verification.</p>
-          <p>For delays or issues, contact:</p>
-          <div class="ct">📲 +92 333 9073110</div>
-        </div>
+      <div class="panel" style="padding:0;overflow:hidden;display:flex;align-items:stretch">
+        <img src="{{ asset('imagess/dollarbullpayment.jpeg') }}"
+             alt="Payment Details"
+             style="width:100%;height:auto;display:block;object-fit:cover;max-height:600px">
       </div>
       <div class="panel">
         <div class="ptitle">Enrollment Form</div>
