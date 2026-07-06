@@ -129,6 +129,32 @@
       transition: border-color .3s
     }
 
+    .pay-panel {
+      padding: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .pay-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block
+    }
+
+    @media(max-width:600px) {
+      .pay-panel {
+        min-height: 0
+      }
+
+      .pay-img {
+        height: auto;
+        max-height: 78vh
+      }
+    }
+
     .panel:hover {
       border-color: var(--border-h)
     }
@@ -590,10 +616,9 @@
     </header>
     <div class="div"><span></span><span style="color:var(--gold);font-size:8px">◆</span><span></span></div>
     <div class="grid">
-      <div class="panel" style="padding:0;overflow:hidden;display:flex;align-items:stretch">
+      <div class="panel pay-panel">
         <img src="{{ asset('storage/img/dollarbullpayment.jpeg') }}"
-             alt="Payment Details"
-             style="width:100%;height:auto;display:block;object-fit:cover;max-height:600px">
+             alt="Payment Details" class="pay-img">
       </div>
       <div class="panel">
         <div class="ptitle">Enrollment Form</div>
