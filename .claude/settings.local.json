@@ -15,7 +15,9 @@
       "Read(//etc/nginx/**)",
       "Bash(git add *)",
       "Bash(git commit -q -m 'Serve enroll payment image from storage/img \\(same as other images\\) *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(identify -format \"%wx%h\\\\n\" storage/app/public/img/dollarbullpayment.jpeg)",
+      "Bash(python3 -c \"from PIL import Image; print\\(Image.open\\('storage/app/public/img/dollarbullpayment.jpeg'\\).size\\)\")"
     ]
   }
 }
