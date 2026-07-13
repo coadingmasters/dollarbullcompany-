@@ -47,6 +47,9 @@
             <main class="player">
                 <h2 id="lessonTitle">{{ $course->videos->first()->title }}</h2>
                 <video id="lessonPlayer" controls playsinline preload="metadata"
+                       controlsList="nodownload noremoteplayback noplaybackrate"
+                       disablePictureInPicture disableRemotePlayback
+                       oncontextmenu="return false"
                        src="{{ $course->videos->first()->video_url }}"
                        onerror="document.getElementById('videoError').style.display='block'">
                 </video>
