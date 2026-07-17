@@ -68,12 +68,21 @@ class CourseVideo extends Model
     /**
      * A short-lived signed link instead of a permanent public file URL, so a
      * copied address stops working and never reveals where the file lives.
+     *
+     * Deliberately relative: this host sits behind a proxy without trusted
+     * headers, so an absolute URL would sign the wrong scheme — breaking the
+     * signature, or emitting an http:// link that an https page refuses to load.
      */
     public function getVideoUrlAttribute(): string
     {
-        return URL::temporarySignedRoute('courses.video', now()->addMinutes(self::LINK_TTL_MINUTES), [
-            'course' => $this->course->slug,
-            'video'  => $this->getKey(),
-        ]);
+        return URL::temporarySignedRoute(
+            'courses.video',
+            now()->addMinutes(self::LINK_TTL_MINUTES),
+            [
+                'course' => $this->course->slug,
+                'video'  => $this->getKey(),
+            ],
+            absolute: false,
+        );
     }
 }

@@ -221,7 +221,7 @@ Route::middleware(['auth:student', 'verified.course'])->group(function () {
     Route::get('/courses/{course:slug}/learn', [CourseLearnController::class, 'show'])->name('courses.learn');
 
     Route::get('/courses/{course:slug}/video/{video}', [CourseLearnController::class, 'stream'])
-        ->middleware('signed')
+        ->middleware('signed:relative')
         ->name('courses.video');
 });
 
