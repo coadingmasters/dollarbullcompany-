@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course;
+use App\Models\CourseVideo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -138,7 +139,7 @@ class ChunkedVideoUploadController extends Controller
 
         // Assemble chunks → final video file
         $finalRelPath = 'videos/' . Str::uuid() . '.' . $ext;
-        $finalAbsPath = Storage::disk('public')->path($finalRelPath);
+        $finalAbsPath = Storage::disk(CourseVideo::DISK)->path($finalRelPath);
 
         $destDir = dirname($finalAbsPath);
         if (! is_dir($destDir)) {
@@ -148,7 +149,7 @@ class ChunkedVideoUploadController extends Controller
         $out = @fopen($finalAbsPath, 'wb');
         if (! $out) {
             return response()->json([
-                'error' => 'Cannot write video file. Check that storage/app/public/videos is writable.',
+                'error' => 'Cannot write video file. Check that storage/app/private/videos is writable.',
             ], 500);
         }
 

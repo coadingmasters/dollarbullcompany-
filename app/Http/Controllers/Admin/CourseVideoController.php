@@ -32,11 +32,11 @@ class CourseVideoController extends Controller
             ]);
         }
 
-        $path = $file->store('videos', 'public');
+        $path = $file->store('videos', CourseVideo::DISK);
 
         if (! $path) {
             throw ValidationException::withMessages([
-                'video' => 'Could not save the video file. Check that storage/app/public is writable.',
+                'video' => 'Could not save the video file. Check that storage/app/private is writable.',
             ]);
         }
 

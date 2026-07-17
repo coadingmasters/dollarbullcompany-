@@ -219,6 +219,10 @@ Route::get('/courses/{course:slug}/enroll/success', [CourseEnrollmentController:
 
 Route::middleware(['auth:student', 'verified.course'])->group(function () {
     Route::get('/courses/{course:slug}/learn', [CourseLearnController::class, 'show'])->name('courses.learn');
+
+    Route::get('/courses/{course:slug}/video/{video}', [CourseLearnController::class, 'stream'])
+        ->middleware('signed')
+        ->name('courses.video');
 });
 
 Route::get('/login', fn () => redirect()->route('student.login', request()->only('redirect')))->name('login');
