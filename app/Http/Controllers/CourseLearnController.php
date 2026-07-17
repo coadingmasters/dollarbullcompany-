@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\CourseVideo;
+use Illuminate\Support\Facades\Log;
 
 class CourseLearnController extends Controller
 {
@@ -27,8 +28,20 @@ class CourseLearnController extends Controller
     public function stream(Course $course, CourseVideo $video)
     {
         abort_unless($course->status === 'published', 404);
-        abort_unless($video->course_id === $course->id, 404);
-        abort_unless($video->fileExists(), 404);
+
+        // Cast both sides: Eloquent casts the primary key to int but leaves the
+        // foreign key as whatever the driver returned, which is a string here.
+        abort_unless((int) $video->course_id === (int) $course->id, 404);
+
+        if (! $video->fileExists()) {
+            Log::warning('Course video file missing on disk', [
+                'video_id'   => $video->id,
+                'video_path' => $video->video_path,
+                'disk'       => $video->diskName(),
+            ]);
+
+            abort(404);
+        }
 
         // BinaryFileResponse answers Range requests itself, which is what keeps
         // seeking working without handing over the whole file.
